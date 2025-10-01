@@ -45,5 +45,7 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Ozzie needs access to your microphone so you can practice reciting Quranic verses and get pronunciation feedback.</string>
 </dict>
 </plist>

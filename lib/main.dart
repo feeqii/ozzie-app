@@ -1,27 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ozzie/core/router/app_router.dart';
 import 'package:ozzie/core/theme/app_theme.dart';
-import 'package:ozzie/features/lesson/ui/screens/verse_display_screen.dart';
 
 /// 🚀 MAIN ENTRY POINT
 /// 
 /// This is where the Ozzie app starts!
+/// 
+/// WHAT CHANGED?
+/// We now use:
+/// 1. ProviderScope - Wraps the app for Riverpod state management
+/// 2. MaterialApp.router - Uses our GoRouter for navigation
+/// 
+/// WHY?
+/// - ProviderScope: Lets us use Riverpod for managing app state (user progress, lesson flow, etc.)
+/// - GoRouter: Gives us professional navigation with deep links and organized routes
 void main() {
-  runApp(const MyApp());
+  runApp(
+    // ProviderScope enables Riverpod state management throughout the app
+    const ProviderScope(
+      child: MyApp(),
+    ),
+  );
 }
 
 /// 📱 MY APP WIDGET
 /// 
 /// The root widget of the entire app.
+/// Now uses MaterialApp.router instead of regular MaterialApp!
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
+      // App title
       title: 'Ozzie - Quranic Learning',
+      
+      // Our beautiful theme
       theme: AppTheme.lightTheme,
+      
+      // Hide the debug banner (that red ribbon in the corner)
       debugShowCheckedModeBanner: false,
-      home: const VerseDisplayScreen(),
+      
+      // Router configuration - this manages all navigation!
+      routerConfig: AppRouter.router,
     );
   }
 }

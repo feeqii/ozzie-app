@@ -37,6 +37,27 @@ dependencies:
   
   # Google Fonts - for Poppins (English) and Amiri (Arabic)
   google_fonts: ^6.2.1
+  
+  # Navigation - GoRouter for declarative routing
+  go_router: ^14.6.2
+  
+  # State Management - Riverpod for reactive state
+  flutter_riverpod: ^2.6.1
+  
+  # Audio - for playing Quranic recitations
+  audioplayers: ^6.1.0
+  
+  # Audio Recording - for recording user's recitation
+  # TODO: Re-enable when switching to flutter_sound or record package is fixed
+  # record: 5.0.4
+  
+  # Permissions - for microphone access
+  # TODO: Re-enable when recording feature is active
+  # permission_handler: ^11.0.0
+  
+  # Local Storage - for saving user progress
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
 
 dev_dependencies:
   flutter_test:
