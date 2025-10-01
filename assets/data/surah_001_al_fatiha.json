@@ -1,0 +1,262 @@
+{
+  "number": 1,
+  "nameArabic": "الفاتحة",
+  "nameEnglish": "Al-Fatiha",
+  "nameMeaning": "The Opening",
+  "totalVerses": 7,
+  "revelationType": "Meccan",
+  "description": "Al-Fatiha is the very first chapter of the Quran! It's special because we recite it in EVERY prayer (at least 17 times a day!). Prophet Muhammad ﷺ called it 'The Greatest Surah in the Quran'. It's like a beautiful conversation with Allah - we praise Him, ask for His guidance, and seek the straight path. Even though it's short, it contains everything a Muslim needs: praise, worship, and prayer! 💙",
+  "themes": [
+    "Praise to Allah",
+    "Seeking Guidance", 
+    "The Straight Path",
+    "Prayer and Worship"
+  ],
+  "verses": [
+    {
+      "verseNumber": 1,
+      "arabicText": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+      "transliteration": "Bismillah ir-Rahman ir-Raheem",
+      "translation": "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
+      "explanationForKids": "🌟 This beautiful verse is like saying 'I start everything with Allah's name!'\n\nThink of it like this:\n• When you start eating, you say 'Bismillah'\n• When you start reading, you say 'Bismillah'\n• This verse reminds us to always remember Allah!\n\nThe verse tells us that Allah is:\n✨ Ar-Rahman: Very kind to EVERYONE (even people who don't know Him!)\n✨ Ar-Raheem: Extra special kind to people who love Him!\n\nJust like your parents are kind to you, Allah is even MORE kind! 💙",
+      "audioUrl": "https://everyayah.com/data/Alafasy_128kbps/001001.mp3",
+      "words": [
+        {
+          "arabic": "بِسْمِ",
+          "transliteration": "Bismi",
+          "meaning": "In the name",
+          "position": 0
+        },
+        {
+          "arabic": "اللَّهِ",
+          "transliteration": "Allahi",
+          "meaning": "of Allah",
+          "position": 1
+        },
+        {
+          "arabic": "الرَّحْمَٰنِ",
+          "transliteration": "Ar-Rahmani",
+          "meaning": "the Most Gracious",
+          "position": 2
+        },
+        {
+          "arabic": "الرَّحِيمِ",
+          "transliteration": "Ar-Raheem",
+          "meaning": "the Most Merciful",
+          "position": 3
+        }
+      ]
+    },
+    {
+      "verseNumber": 2,
+      "arabicText": "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+      "transliteration": "Alhamdu lillahi rabbil 'alamin",
+      "translation": "All praise is due to Allah, Lord of all the worlds.",
+      "explanationForKids": "🌍 This verse teaches us to THANK Allah for everything!\n\nWhat does 'Rabb' mean?\nRabb means Allah is like a loving parent, teacher, and protector - all in one! He:\n• Created us\n• Takes care of us\n• Gives us everything we need\n\nWhat are 'all the worlds'?\nThat means EVERYTHING! The whole universe!\n• The earth 🌍\n• The sky ☁️\n• The stars ⭐\n• Angels, humans, animals - everything!\n\nSo this verse is saying: 'Thank you Allah! You're the Boss of EVERYTHING!' Pretty amazing, right? 🌟",
+      "audioUrl": "https://everyayah.com/data/Alafasy_128kbps/001002.mp3",
+      "words": [
+        {
+          "arabic": "الْحَمْدُ",
+          "transliteration": "Alhamdu",
+          "meaning": "All praise",
+          "position": 0
+        },
+        {
+          "arabic": "لِلَّهِ",
+          "transliteration": "lillahi",
+          "meaning": "is for Allah",
+          "position": 1
+        },
+        {
+          "arabic": "رَبِّ",
+          "transliteration": "rabbi",
+          "meaning": "Lord",
+          "position": 2
+        },
+        {
+          "arabic": "الْعَالَمِينَ",
+          "transliteration": "al-'alamin",
+          "meaning": "of all the worlds",
+          "position": 3
+        }
+      ]
+    },
+    {
+      "verseNumber": 3,
+      "arabicText": "الرَّحْمَٰنِ الرَّحِيمِ",
+      "transliteration": "Ar-Rahman ir-Raheem",
+      "translation": "The Entirely Merciful, the Especially Merciful.",
+      "explanationForKids": "💙 Allah is reminding us AGAIN how merciful He is!\n\nWhy does Allah mention His mercy twice?\nBecause it's SUPER important! Allah wants us to know:\n\n1️⃣ Ar-Rahman (The Most Gracious):\n• He's merciful to EVERYONE\n• Like the sun shining on everyone\n• Even if people don't believe in Him, He still gives them food, air, and life!\n\n2️⃣ Ar-Raheem (The Most Merciful):\n• He's EXTRA merciful to believers\n• Like a special hug for those who love Him\n• He forgives us when we make mistakes\n\nThink about it: If you have 100 problems, Allah's mercy is like having 1,000 solutions! He never runs out of kindness! 🌈",
+      "audioUrl": "https://everyayah.com/data/Alafasy_128kbps/001003.mp3",
+      "words": [
+        {
+          "arabic": "الرَّحْمَٰنِ",
+          "transliteration": "Ar-Rahmani",
+          "meaning": "The Entirely Merciful",
+          "position": 0
+        },
+        {
+          "arabic": "الرَّحِيمِ",
+          "transliteration": "Ar-Raheem",
+          "meaning": "The Especially Merciful",
+          "position": 1
+        }
+      ]
+    },
+    {
+      "verseNumber": 4,
+      "arabicText": "مَالِكِ يَوْمِ الدِّينِ",
+      "transliteration": "Maliki yawmid-deen",
+      "translation": "Master of the Day of Judgment.",
+      "explanationForKids": "⚖️ This verse is about a VERY important day!\n\nWhat is the Day of Judgment?\nIt's like the ultimate Report Card Day! After this life ends, there's a special day when:\n• Allah will judge everyone fairly\n• Good deeds will be rewarded 🌟\n• Bad deeds will be shown\n• Everyone gets what they deserve\n\nWhy is Allah the 'Master' of that day?\nBecause:\n• Only Allah decides who goes to Paradise 🌴\n• Only Allah judges fairly - no mistakes!\n• That day, no one else has any power - only Allah!\n\nWhat should we do?\nBe good NOW so we can be happy THEN! Every good deed counts - even smiling at someone! 😊\n\nRemember: Allah is the kindest judge ever. He wants us to succeed! 💪",
+      "audioUrl": "https://everyayah.com/data/Alafasy_128kbps/001004.mp3",
+      "words": [
+        {
+          "arabic": "مَالِكِ",
+          "transliteration": "Maliki",
+          "meaning": "Master",
+          "position": 0
+        },
+        {
+          "arabic": "يَوْمِ",
+          "transliteration": "yawmi",
+          "meaning": "Day",
+          "position": 1
+        },
+        {
+          "arabic": "الدِّينِ",
+          "transliteration": "ad-deen",
+          "meaning": "of Judgment",
+          "position": 2
+        }
+      ]
+    },
+    {
+      "verseNumber": 5,
+      "arabicText": "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
+      "transliteration": "Iyyaka na'budu wa iyyaka nasta'een",
+      "translation": "You alone we worship, and You alone we ask for help.",
+      "explanationForKids": "🙏 Now WE start talking to Allah!\n\n(The first 4 verses were ABOUT Allah, now we're talking TO Him directly!)\n\nWhat does this verse mean?\n\n1️⃣ 'You ALONE we worship':\n• We only pray to Allah, not to statues, stars, or people\n• We don't worship money, games, or fame\n• Allah comes first in our hearts! 💙\n\n2️⃣ 'You ALONE we ask for help':\n• When we have a problem, we ask Allah\n• When we need something, we pray to Allah\n• We can ask parents and friends too, but REAL help comes from Allah!\n\nThink of it like this:\nAllah is like the ULTIMATE helper! He can:\n✨ Make impossible things possible\n✨ Help you when no one else can\n✨ Give you more than you even asked for!\n\nSo this verse is like saying: 'Ya Allah, You're #1 in my life! I worship only You and need only Your help!' 🌟",
+      "audioUrl": "https://everyayah.com/data/Alafasy_128kbps/001005.mp3",
+      "words": [
+        {
+          "arabic": "إِيَّاكَ",
+          "transliteration": "Iyyaka",
+          "meaning": "You alone",
+          "position": 0
+        },
+        {
+          "arabic": "نَعْبُدُ",
+          "transliteration": "na'budu",
+          "meaning": "we worship",
+          "position": 1
+        },
+        {
+          "arabic": "وَإِيَّاكَ",
+          "transliteration": "wa iyyaka",
+          "meaning": "and You alone",
+          "position": 2
+        },
+        {
+          "arabic": "نَسْتَعِينُ",
+          "transliteration": "nasta'een",
+          "meaning": "we ask for help",
+          "position": 3
+        }
+      ]
+    },
+    {
+      "verseNumber": 6,
+      "arabicText": "اهْدِنَا الصِّرَاطَ الْمُسْتَقِيمَ",
+      "transliteration": "Ihdinas-siratal-mustaqeem",
+      "translation": "Guide us to the straight path.",
+      "explanationForKids": "🛤️ This is the MOST important prayer!\n\nWhat is the 'Straight Path'?\nImagine you're going somewhere important. There are many roads:\n• Some roads are zigzag and confusing 🔀\n• Some roads lead to the wrong place ❌\n• But ONE road is straight, clear, and leads to success! ✅\n\nThe Straight Path is:\n✨ Following Islam correctly\n✨ Being a good Muslim\n✨ Doing what Allah loves\n✨ Avoiding what Allah dislikes\n✨ Being kind, honest, and helpful\n\nWhy do we ask for guidance?\nBecause:\n• Life can be confusing!\n• Sometimes we don't know what's right\n• We can make mistakes\n• We need Allah's help to stay on track!\n\nCool fact: We ask for this guidance at least 17 times EVERY DAY in our prayers! Why? Because we ALWAYS need Allah's guidance! 🌟\n\nIt's like asking for GPS from Allah! 📍",
+      "audioUrl": "https://everyayah.com/data/Alafasy_128kbps/001006.mp3",
+      "words": [
+        {
+          "arabic": "اهْدِنَا",
+          "transliteration": "Ihdina",
+          "meaning": "Guide us",
+          "position": 0
+        },
+        {
+          "arabic": "الصِّرَاطَ",
+          "transliteration": "as-sirata",
+          "meaning": "to the path",
+          "position": 1
+        },
+        {
+          "arabic": "الْمُسْتَقِيمَ",
+          "transliteration": "al-mustaqeem",
+          "meaning": "the straight",
+          "position": 2
+        }
+      ]
+    },
+    {
+      "verseNumber": 7,
+      "arabicText": "صِرَاطَ الَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ الْمَغْضُوبِ عَلَيْهِمْ وَلَا الضَّالِّينَ",
+      "transliteration": "Siratal-latheena an'amta 'alayhim ghayril-maghdoobi 'alayhim walad-dalleen",
+      "translation": "The path of those upon whom You have bestowed favor, not of those who have earned anger or of those who are astray.",
+      "explanationForKids": "🌟 This verse explains WHICH straight path we want!\n\nAllah is saying: Follow the path of the GOOD people!\n\n1️⃣ 'Those You have blessed':\nWho are they?\n• The Prophets (like Prophet Muhammad ﷺ) 📿\n• The truthful and righteous people\n• People who obeyed Allah\n• The heroes of Islam!\n\nThese are our role models! We want to be like them! 💪\n\n2️⃣ 'Not those who earned anger':\n• People who KNEW the truth but ignored it\n• People who were given blessings but became arrogant\n• We don't want to be like them!\n\n3️⃣ 'Nor those who are astray':\n• People who are lost and confused\n• People who don't know the right way\n• We ask Allah to save us from being lost!\n\nThink of it like choosing teammates:\nWe want to be on the WINNING team - the team of prophets and righteous people! Not the team that goes the wrong way!\n\nWhen you finish Al-Fatiha, say 'Ameen'! That means 'O Allah, please accept my prayer!' 🤲\n\nAnd that's it! You just learned the most important Surah in the Quran! How amazing is that?! 🎉",
+      "audioUrl": "https://everyayah.com/data/Alafasy_128kbps/001007.mp3",
+      "words": [
+        {
+          "arabic": "صِرَاطَ",
+          "transliteration": "Sirata",
+          "meaning": "The path",
+          "position": 0
+        },
+        {
+          "arabic": "الَّذِينَ",
+          "transliteration": "allatheena",
+          "meaning": "of those",
+          "position": 1
+        },
+        {
+          "arabic": "أَنْعَمْتَ",
+          "transliteration": "an'amta",
+          "meaning": "You have blessed",
+          "position": 2
+        },
+        {
+          "arabic": "عَلَيْهِمْ",
+          "transliteration": "'alayhim",
+          "meaning": "upon them",
+          "position": 3
+        },
+        {
+          "arabic": "غَيْرِ",
+          "transliteration": "ghayri",
+          "meaning": "not",
+          "position": 4
+        },
+        {
+          "arabic": "الْمَغْضُوبِ",
+          "transliteration": "al-maghdoobi",
+          "meaning": "those who earned anger",
+          "position": 5
+        },
+        {
+          "arabic": "عَلَيْهِمْ",
+          "transliteration": "'alayhim",
+          "meaning": "upon them",
+          "position": 6
+        },
+        {
+          "arabic": "وَلَا",
+          "transliteration": "wala",
+          "meaning": "and not",
+          "position": 7
+        },
+        {
+          "arabic": "الضَّالِّينَ",
+          "transliteration": "ad-dalleen",
+          "meaning": "those who are astray",
+          "position": 8
+        }
+      ]
+    }
+  ]
+}
+

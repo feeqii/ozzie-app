@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ozzie/core/theme/app_theme.dart';
-import 'package:ozzie/core/widgets/ozzie_button.dart';
-import 'package:ozzie/core/widgets/ozzie_card.dart';
-import 'package:ozzie/core/widgets/ozzie_placeholder.dart';
-import 'package:ozzie/core/widgets/ozzie_progress_bar.dart';
-import 'package:ozzie/core/constants/app_sizes.dart';
+import 'package:ozzie/features/lesson/ui/screens/verse_display_screen.dart';
 
 /// 🚀 MAIN ENTRY POINT
 void main() {
@@ -21,7 +17,7 @@ class MyApp extends StatelessWidget {
       title: 'Ozzie - Quranic Learning',
       theme: AppTheme.lightTheme,
       debugShowCheckedModeBanner: false,
-      home: const WidgetShowcaseScreen(),
+      home: const VerseDisplayScreen(),
     );
   }
 }
@@ -208,7 +204,7 @@ class WidgetShowcaseScreen extends StatelessWidget {
                           'Tap me!',
                           style: Theme.of(context).textTheme.titleMedium,
                         ),
-                        Text(
+            Text(
                           'This card is interactive',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
