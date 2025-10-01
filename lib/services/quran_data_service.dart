@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:ozzie/features/lesson/data/models/surah_model.dart';
+import 'package:ozzie/features/lesson/data/models/verse_model.dart';
 
 /// 🔌 QURAN DATA SERVICE
 /// 

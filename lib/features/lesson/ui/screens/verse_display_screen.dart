@@ -116,7 +116,7 @@ class _VerseDisplayScreenState extends State<VerseDisplayScreen> {
                           const SizedBox(height: AppSizes.spaceLarge),
 
                           // Verses
-                          ..._ surah!.verses.map((verse) {
+                          ..._surah!.verses.map((verse) {
                             return Padding(
                               padding: const EdgeInsets.only(bottom: AppSizes.spaceMedium),
                               child: OzzieCard(
