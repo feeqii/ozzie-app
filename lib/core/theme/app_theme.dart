@@ -133,7 +133,7 @@ class AppTheme {
       // ========== CARD THEME ==========
       
       /// How cards look in the app
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: AppColors.white,
         elevation: AppSizes.cardElevation,
         shape: RoundedRectangleBorder(
@@ -239,7 +239,7 @@ class AppTheme {
       // ========== DIALOG THEME ==========
       
       /// Pop-up boxes
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: AppColors.white,
         elevation: 8,
         shape: RoundedRectangleBorder(
