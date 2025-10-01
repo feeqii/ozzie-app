@@ -34,6 +34,7 @@ Ozzie is a **Duolingo-style Quranic learning app** designed specifically for chi
 | [PROJECT_BRIEF.md](PROJECT_BRIEF.md) | Complete project vision, scope, and requirements |
 | [RESEARCH_FINDINGS.md](RESEARCH_FINDINGS.md) | Technical research on APIs, fonts, AI services |
 | [ACTION_PLAN.md](ACTION_PLAN.md) | Week-by-week development plan with tasks |
+| [DEVELOPER_PREFERENCES.md](DEVELOPER_PREFERENCES.md) | ⭐ **How I like to work, communicate, and learn** |
 
 ---
 
