@@ -12,8 +12,8 @@ import 'package:ozzie/features/lesson/logic/progress_controller.dart';
 /// Beautiful, clean cosmic quest with planets from bottom to top
 /// Info section at bottom for clear progress display
 
-class SurahMapScreen extends ConsumerWidget {
-  const SurahMapScreen({super.key});
+class SurahMapScreenV2 extends ConsumerWidget {
+  const SurahMapScreenV2({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -191,95 +191,61 @@ class SurahMapScreen extends ConsumerWidget {
           ? () => context.push('/surah/$surahNumber/trail')
           : null,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          // Planet with glow effect - using ClipOval to force circular shape
-          SizedBox(
-            width: size + (isActive ? 100 : 60),
-            height: size + (isActive ? 100 : 60),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Outer glow (only if unlocked)
-                if (isUnlocked)
-                  Container(
-                    width: size + (isActive ? 80 : 40),
-                    height: size + (isActive ? 80 : 40),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          color.withOpacity(isActive ? 0.4 : 0.2),
-                          color.withOpacity(0.0),
-                        ],
+          // Planet
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            width: size,
+            height: size,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: isUnlocked
+                  ? RadialGradient(
+                      colors: [
+                        color.withOpacity(0.8),
+                        color.withOpacity(0.4),
+                      ],
+                    )
+                  : RadialGradient(
+                      colors: [
+                        AppColors.lightGray.withOpacity(0.3),
+                        AppColors.lightGray.withOpacity(0.1),
+                      ],
+                    ),
+              boxShadow: isActive && isUnlocked
+                  ? [
+                      BoxShadow(
+                        color: color.withOpacity(0.5),
+                        blurRadius: 40,
+                        spreadRadius: 10,
                       ),
-                    ),
-                  ),
-                
-                // Main planet (circular)
-                ClipOval(
-                  child: Container(
-                    width: size,
-                    height: size,
-                    decoration: BoxDecoration(
-                      gradient: isUnlocked
-                          ? RadialGradient(
-                              colors: [
-                                color.withOpacity(1.0),
-                                color.withOpacity(0.8),
-                                color.withOpacity(0.6),
-                              ],
-                              stops: const [0.0, 0.6, 1.0],
-                            )
-                          : RadialGradient(
-                              colors: [
-                                AppColors.lightGray.withOpacity(0.4),
-                                AppColors.lightGray.withOpacity(0.2),
-                              ],
+                    ]
+                  : [],
+            ),
+            child: Center(
+              child: !isUnlocked
+                  ? const Icon(Icons.lock, color: AppColors.white, size: 40)
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          nameArabic,
+                          style: AppTextStyles.arabicMedium.copyWith(
+                            color: AppColors.white,
+                            fontSize: isActive ? 28 : 24,
+                          ),
+                        ),
+                        if (isCompleted)
+                          const Padding(
+                            padding: EdgeInsets.only(top: 8),
+                            child: Icon(
+                              Icons.check_circle,
+                              color: AppColors.white,
+                              size: 32,
                             ),
+                          ),
+                      ],
                     ),
-                    child: Center(
-                      child: !isUnlocked
-                          ? const Icon(Icons.lock, color: AppColors.white, size: 40)
-                          : Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  nameArabic,
-                                  style: AppTextStyles.arabicMedium.copyWith(
-                                    color: AppColors.white,
-                                    fontSize: isActive ? 32 : 26,
-                                    fontWeight: FontWeight.w600,
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.black.withOpacity(0.4),
-                                        blurRadius: 12,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                if (isCompleted)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8),
-                                    child: Icon(
-                                      Icons.check_circle,
-                                      color: AppColors.white,
-                                      size: isActive ? 36 : 28,
-                                      shadows: const [
-                                        Shadow(
-                                          color: Colors.black38,
-                                          blurRadius: 12,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                              ],
-                            ),
-                    ),
-                  ),
-                ),
-              ],
             ),
           ),
           
@@ -395,54 +361,22 @@ class SurahMapScreen extends ConsumerWidget {
             
             const SizedBox(height: AppSizes.spaceMedium),
             
-            // Show completion badge or progress
-            if (isFatihaCompleted && isAlFatiha)
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: AppColors.success.withOpacity(0.3),
-                    width: 2,
-                  ),
+            Row(
+              children: [
+                Icon(
+                  Icons.menu_book,
+                  color: AppColors.textSecondary,
+                  size: 20,
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.check_circle,
-                      color: AppColors.success,
-                      size: 24,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      'SURAH COMPLETED!',
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        color: AppColors.success,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            else
-              Row(
-                children: [
-                  Icon(
-                    Icons.menu_book,
+                const SizedBox(width: 8),
+                Text(
+                  '$completed of $total verses completed',
+                  style: AppTextStyles.bodyMedium.copyWith(
                     color: AppColors.textSecondary,
-                    size: 20,
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '$completed of $total verses completed',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
+            ),
             
             const SizedBox(height: AppSizes.spaceMedium),
             
@@ -456,9 +390,7 @@ class SurahMapScreen extends ConsumerWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    isFatihaCompleted && isAlFatiha 
-                      ? 'Review Verses' 
-                      : 'Continue Learning',
+                    'Continue Learning',
                     style: AppTextStyles.button.copyWith(
                       color: AppColors.white,
                     ),

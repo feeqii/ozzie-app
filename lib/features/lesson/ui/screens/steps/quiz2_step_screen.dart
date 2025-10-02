@@ -5,6 +5,7 @@ import 'package:ozzie/core/constants/app_text_styles.dart';
 import 'package:ozzie/core/widgets/ozzie_card.dart';
 import 'package:ozzie/core/widgets/ozzie_placeholder.dart';
 import 'package:ozzie/features/lesson/data/models/verse_model.dart';
+import 'package:ozzie/features/lesson/data/models/quiz_model.dart';
 
 /// ❓ QUIZ 2 STEP SCREEN (Step 5 of 6)
 /// 
@@ -18,8 +19,8 @@ import 'package:ozzie/features/lesson/data/models/verse_model.dart';
 /// - Immediate feedback (correct/incorrect)
 /// - Explanation if wrong
 /// 
-/// NOTE: Questions are hardcoded for now
-/// TODO: Add questions to verse JSON data for scalability
+/// NOTE: Quiz questions now loaded from JSON! 🎉
+/// Each verse has its quiz2 data in the JSON file.
 
 class Quiz2StepScreen extends StatefulWidget {
   final Verse verse;
@@ -40,126 +41,37 @@ class _Quiz2StepScreenState extends State<Quiz2StepScreen> {
   bool hasSubmitted = false;
   bool? isCorrect;
 
-  // Quiz data (hardcoded for now)
-  late QuizQuestion question;
+  // Quiz data loaded from verse
+  Quiz? get quiz => widget.verse.quiz2;
 
-  @override
-  void initState() {
-    super.initState();
-    question = _getQuestionForVerse(widget.verse.verseNumber);
+  /// Get quiz question - now from JSON data!
+  /// 
+  /// If quiz2 is not in the JSON, we show a fallback question
+  Quiz _getQuestion() {
+    // Try to get quiz from verse data
+    if (quiz != null) {
+      return quiz!;
+    }
+    
+    // Fallback question if quiz2 is missing from JSON
+    return _getFallbackQuestion(widget.verse.verseNumber);
   }
 
-  /// Get quiz question based on verse number
-  /// 
-  /// TODO: Move these to JSON data for easier management
-  QuizQuestion _getQuestionForVerse(int verseNumber) {
-    // Questions for Al-Fatiha verses
-    switch (verseNumber) {
-      case 1:
-        return QuizQuestion(
-          question: "What does 'Bismillah' mean?",
-          options: [
-            "In the name of Allah",
-            "Praise be to Allah",
-            "There is no god but Allah",
-            "Allah is the Greatest",
-          ],
-          correctAnswer: "In the name of Allah",
-          explanation: "'Bismillah' means 'In the name of Allah'. Muslims say this before starting anything to remember Allah!",
-        );
-      
-      case 2:
-        return QuizQuestion(
-          question: "Who is this verse praising?",
-          options: [
-            "Allah, the Lord of all worlds",
-            "The Prophet Muhammad",
-            "The angels",
-            "Our parents",
-          ],
-          correctAnswer: "Allah, the Lord of all worlds",
-          explanation: "This verse praises Allah, who is the Lord and Creator of everything in all the worlds!",
-        );
-      
-      case 3:
-        return QuizQuestion(
-          question: "What are the two names of Allah mentioned?",
-          options: [
-            "Ar-Rahman and Ar-Raheem (The Most Merciful)",
-            "Al-Malik and Al-Quddus (The King and The Holy)",
-            "As-Salam and Al-Mumin (The Peace and The Believer)",
-            "Al-Aziz and Al-Hakeem (The Mighty and The Wise)",
-          ],
-          correctAnswer: "Ar-Rahman and Ar-Raheem (The Most Merciful)",
-          explanation: "Ar-Rahman means Allah is very merciful to everyone, and Ar-Raheem means He is especially merciful to believers!",
-        );
-      
-      case 4:
-        return QuizQuestion(
-          question: "What day is mentioned in this verse?",
-          options: [
-            "The Day of Judgment",
-            "The Day of Friday",
-            "The Day of Eid",
-            "The Day of Arafah",
-          ],
-          correctAnswer: "The Day of Judgment",
-          explanation: "This verse talks about the Day of Judgment, when Allah will judge all people for their deeds!",
-        );
-      
-      case 5:
-        return QuizQuestion(
-          question: "What do we ask Allah in this verse?",
-          options: [
-            "To worship only Him and seek His help",
-            "To give us food and water",
-            "To make us rich",
-            "To give us many friends",
-          ],
-          correctAnswer: "To worship only Him and seek His help",
-          explanation: "We promise to worship only Allah and ask only Him for help in everything we do!",
-        );
-      
-      case 6:
-        return QuizQuestion(
-          question: "What path do we ask Allah to guide us to?",
-          options: [
-            "The straight path",
-            "The easy path",
-            "The wide path",
-            "The short path",
-          ],
-          correctAnswer: "The straight path",
-          explanation: "The straight path (As-Sirat Al-Mustaqeem) is the path of Islam that leads to Allah's pleasure and Paradise!",
-        );
-      
-      case 7:
-        return QuizQuestion(
-          question: "Who walked the straight path that we want to follow?",
-          options: [
-            "Those Allah blessed (the Prophets and righteous people)",
-            "The angels in heaven",
-            "The rich and famous people",
-            "The kings and rulers",
-          ],
-          correctAnswer: "Those Allah blessed (the Prophets and righteous people)",
-          explanation: "We want to follow the path of those Allah blessed, like the Prophets, companions, and all righteous Muslims!",
-        );
-      
-      // Default question for other verses
-      default:
-        return QuizQuestion(
-          question: "What is the main message of this verse?",
-          options: [
-            "To remember Allah and follow His guidance",
-            "To be kind to animals",
-            "To study hard in school",
-            "To play sports",
-          ],
-          correctAnswer: "To remember Allah and follow His guidance",
-          explanation: "The Quran teaches us to always remember Allah and follow His guidance in our lives!",
-        );
-    }
+  /// Fallback question (for backwards compatibility)
+  /// This is only used if quiz2 is missing from the JSON
+  Quiz _getFallbackQuestion(int verseNumber) {
+    // Default fallback question
+    return Quiz(
+      question: "What is the main message of this verse?",
+      options: [
+        "To remember Allah and follow His guidance",
+        "To be kind to animals",
+        "To study hard in school",
+        "To play sports",
+      ],
+      correctAnswerIndex: 0,
+      explanation: "The Quran teaches us to always remember Allah and follow His guidance in our lives!",
+    );
   }
 
   void _selectAnswer(String answer) {
@@ -172,6 +84,8 @@ class _Quiz2StepScreenState extends State<Quiz2StepScreen> {
 
   void _submitAnswer() {
     if (selectedAnswer == null) return;
+    
+    final question = _getQuestion();
     
     // Submit to controller
     final correct = widget.onAnswerSubmit(
@@ -195,6 +109,8 @@ class _Quiz2StepScreenState extends State<Quiz2StepScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final question = _getQuestion();
+    
     return SingleChildScrollView(
       padding: const EdgeInsets.all(AppSizes.screenPadding),
       child: Column(
@@ -380,6 +296,8 @@ class _Quiz2StepScreenState extends State<Quiz2StepScreen> {
 
   /// Feedback after submission
   Widget _buildFeedback() {
+    final question = _getQuestion();
+    
     return Column(
       children: [
         const SizedBox(height: AppSizes.spaceLarge),
@@ -454,19 +372,4 @@ class _Quiz2StepScreenState extends State<Quiz2StepScreen> {
       ],
     );
   }
-}
-
-/// Quiz question model
-class QuizQuestion {
-  final String question;
-  final List<String> options;
-  final String correctAnswer;
-  final String explanation;
-
-  QuizQuestion({
-    required this.question,
-    required this.options,
-    required this.correctAnswer,
-    required this.explanation,
-  });
 }

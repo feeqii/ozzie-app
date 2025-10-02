@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ozzie/core/router/app_router.dart';
 import 'package:ozzie/core/theme/app_theme.dart';
 
@@ -11,11 +12,21 @@ import 'package:ozzie/core/theme/app_theme.dart';
 /// We now use:
 /// 1. ProviderScope - Wraps the app for Riverpod state management
 /// 2. MaterialApp.router - Uses our GoRouter for navigation
+/// 3. Hive - Initialize local database for progress tracking
 /// 
 /// WHY?
 /// - ProviderScope: Lets us use Riverpod for managing app state (user progress, lesson flow, etc.)
 /// - GoRouter: Gives us professional navigation with deep links and organized routes
-void main() {
+/// - Hive: Fast local database to save user progress (works offline!)
+void main() async {
+  // Ensure Flutter is initialized before running async code
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Hive for local storage
+  await Hive.initFlutter();
+  
+  print('✅ Hive initialized successfully!');
+  
   runApp(
     // ProviderScope enables Riverpod state management throughout the app
     const ProviderScope(

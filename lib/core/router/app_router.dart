@@ -4,6 +4,8 @@ import 'package:ozzie/features/home/ui/screens/home_screen.dart';
 import 'package:ozzie/features/home/ui/screens/surah_map_screen.dart';
 import 'package:ozzie/features/lesson/ui/screens/lesson_flow_screen.dart';
 import 'package:ozzie/features/lesson/ui/screens/verse_display_screen.dart';
+import 'package:ozzie/features/lesson/ui/screens/verse_trail_screen.dart';
+import 'package:ozzie/features/lesson/ui/screens/surah_completion_screen.dart';
 
 /// 🗺️ APP ROUTER
 /// 
@@ -41,7 +43,9 @@ class AppRouter {
   /// Route names - like shortcuts so we don't have to remember paths
   static const String home = 'home';
   static const String surahMap = 'surah-map';
+  static const String verseTrail = 'verse-trail';
   static const String lessonFlow = 'lesson-flow';
+  static const String surahCompletion = 'surah-completion';
   static const String profile = 'profile';
   static const String verseDisplay = 'verse-display'; // Developer test screen
 
@@ -79,6 +83,18 @@ class AppRouter {
         builder: (context, state) => const SurahMapScreen(),
       ),
 
+      // ========== VERSE TRAIL (Verse selector within a Surah) ==========
+      // Shows all verses in a Surah as a vertical trail
+      // Example: /surah/1/trail means Al-Fatiha's verse trail
+      GoRoute(
+        path: '/surah/:surahNumber/trail',
+        name: verseTrail,
+        builder: (context, state) {
+          final surahNumber = int.parse(state.pathParameters['surahNumber']!);
+          return VerseTrailScreen(surahNumber: surahNumber);
+        },
+      ),
+
       // ========== LESSON FLOW (The 6-step learning experience) ==========
       // The main lesson screen - where kids learn verses!
       // Takes parameters: surahNumber and verseNumber
@@ -93,6 +109,34 @@ class AppRouter {
             surahNumber: surahNumber,
             verseNumber: verseNumber,
           );
+        },
+      ),
+
+      // ========== SURAH COMPLETION CELEBRATION ==========
+      // Special celebration when ALL verses of a Surah are completed!
+      // Takes parameters: surahNumber, surahName, totalStars
+      // Example: /surah/1/complete?name=Al-Fatiha&stars=21
+      GoRoute(
+        path: '/surah/:surahNumber/complete',
+        name: surahCompletion,
+        builder: (context, state) {
+          try {
+            final surahNumber = int.parse(state.pathParameters['surahNumber']!);
+            final surahName = Uri.decodeComponent(state.uri.queryParameters['name'] ?? 'Unknown Surah');
+            final totalStars = int.parse(state.uri.queryParameters['stars'] ?? '0');
+            
+            print('🎊 Building Surah Completion: $surahNumber, $surahName, $totalStars stars');
+            
+            return SurahCompletionScreen(
+              surahNumber: surahNumber,
+              surahName: surahName,
+              totalStars: totalStars,
+            );
+          } catch (e) {
+            print('❌ Error building Surah Completion screen: $e');
+            // Fallback to home on error
+            return const HomeScreen();
+          }
         },
       ),
 

@@ -1,4 +1,5 @@
 import 'package:ozzie/features/lesson/data/models/word_model.dart';
+import 'package:ozzie/features/lesson/data/models/quiz_model.dart';
 
 /// 📖 VERSE MODEL
 /// 
@@ -53,6 +54,14 @@ class Verse {
   
   /// Optional: Revelation context (Meccan/Medinan, story behind it)
   final String? revelationContext;
+  
+  /// Quiz 1: Word order quiz (drag & drop)
+  /// Contains instructions and hints for putting words in order
+  final Quiz? quiz1;
+  
+  /// Quiz 2: Comprehension quiz (multiple choice)
+  /// Tests understanding of the verse meaning
+  final Quiz? quiz2;
 
   /// Constructor
   const Verse({
@@ -64,6 +73,8 @@ class Verse {
     required this.audioUrl,
     required this.words,
     this.revelationContext,
+    this.quiz1,
+    this.quiz2,
   });
 
   /// Create a Verse from JSON
@@ -92,6 +103,12 @@ class Verse {
           .map((wordJson) => Word.fromJson(wordJson as Map<String, dynamic>))
           .toList(),
       revelationContext: json['revelationContext'] as String?,
+      quiz1: json['quiz1'] != null 
+          ? Quiz.fromJson(json['quiz1'] as Map<String, dynamic>)
+          : null,
+      quiz2: json['quiz2'] != null
+          ? Quiz.fromJson(json['quiz2'] as Map<String, dynamic>)
+          : null,
     );
   }
 
@@ -106,6 +123,8 @@ class Verse {
       'audioUrl': audioUrl,
       'words': words.map((word) => word.toJson()).toList(),
       if (revelationContext != null) 'revelationContext': revelationContext,
+      if (quiz1 != null) 'quiz1': quiz1!.toJson(),
+      if (quiz2 != null) 'quiz2': quiz2!.toJson(),
     };
   }
 
@@ -119,6 +138,8 @@ class Verse {
     String? audioUrl,
     List<Word>? words,
     String? revelationContext,
+    Quiz? quiz1,
+    Quiz? quiz2,
   }) {
     return Verse(
       verseNumber: verseNumber ?? this.verseNumber,
@@ -129,6 +150,8 @@ class Verse {
       audioUrl: audioUrl ?? this.audioUrl,
       words: words ?? this.words,
       revelationContext: revelationContext ?? this.revelationContext,
+      quiz1: quiz1 ?? this.quiz1,
+      quiz2: quiz2 ?? this.quiz2,
     );
   }
 

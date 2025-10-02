@@ -6,6 +6,7 @@ import 'package:ozzie/core/constants/app_sizes.dart';
 import 'package:ozzie/core/constants/app_text_styles.dart';
 import 'package:ozzie/features/lesson/logic/lesson_flow_controller.dart';
 import 'package:ozzie/features/lesson/logic/lesson_flow_state.dart';
+import 'package:ozzie/features/lesson/logic/progress_controller.dart';
 import 'package:ozzie/features/lesson/ui/screens/steps/explanation_step_screen.dart';
 import 'package:ozzie/features/lesson/ui/screens/steps/recitation_step_screen.dart';
 // TODO: Re-enable when record package issue is fixed or switched to flutter_sound
@@ -87,6 +88,7 @@ class LessonFlowScreen extends ConsumerWidget {
             if (!lessonState.isLoading && lessonState.error == null)
               _buildNavigationButtons(
                 context,
+                ref,
                 lessonState,
                 controller,
               ),
@@ -294,6 +296,7 @@ class LessonFlowScreen extends ConsumerWidget {
   /// Navigation buttons (Back/Next)
   Widget _buildNavigationButtons(
     BuildContext context,
+    WidgetRef ref,
     LessonFlowState state,
     LessonFlowController controller,
   ) {
@@ -320,9 +323,9 @@ class LessonFlowScreen extends ConsumerWidget {
               onPressed: state.canGoNext
                   ? () {
                       if (state.currentStep.isLast) {
-                        // Last step - complete and go home
+                        // Last step - complete lesson and check for Surah completion
                         controller.completeLesson();
-                        context.go('/');
+                        _handleLessonCompletion(context, ref, state);
                       } else {
                         // Move to next step
                         controller.nextStep();
@@ -340,6 +343,59 @@ class LessonFlowScreen extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  /// Handle lesson completion and check for Surah completion
+  void _handleLessonCompletion(
+    BuildContext context,
+    WidgetRef ref,
+    LessonFlowState state,
+  ) {
+    // Give progress service a moment to save
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!context.mounted) return;
+      
+      // Check if Surah is now completed
+      final progressController = ref.read(progressControllerProvider.notifier);
+      final isSurahComplete = progressController.isSurahCompleted(state.surahNumber);
+      
+      print('🔍 Surah ${state.surahNumber} complete: $isSurahComplete');
+      
+      if (isSurahComplete) {
+        // Get Surah progress to calculate total stars
+        final surahProgress = progressController.getSurahProgress(state.surahNumber);
+        final totalStars = surahProgress?.totalStars ?? 0;
+        
+        // Get Surah name (hardcoded for now, can be fetched from JSON later)
+        final surahName = _getSurahName(state.surahNumber);
+        
+        // URL encode the Surah name to handle special characters
+        final encodedName = Uri.encodeComponent(surahName);
+        final route = '/surah/${state.surahNumber}/complete?name=$encodedName&stars=$totalStars';
+        
+        print('🚀 Navigating to: $route');
+        
+        // Navigate to Surah completion celebration!
+        context.go(route);
+      } else {
+        // Surah not complete yet - return to verse trail
+        print('🚀 Navigating to verse trail');
+        context.go('/surah/${state.surahNumber}/trail');
+      }
+    });
+  }
+
+  /// Get Surah name by number
+  /// TODO: Fetch this from JSON in the future
+  String _getSurahName(int surahNumber) {
+    switch (surahNumber) {
+      case 1:
+        return 'Al-Fatiha';
+      case 112:
+        return 'Al-Ikhlas';
+      default:
+        return 'Surah $surahNumber';
+    }
   }
 }
 

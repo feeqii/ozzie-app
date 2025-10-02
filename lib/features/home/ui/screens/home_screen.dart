@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:ozzie/core/constants/app_colors.dart';
 import 'package:ozzie/core/constants/app_sizes.dart';
@@ -7,6 +8,7 @@ import 'package:ozzie/core/widgets/ozzie_button.dart';
 import 'package:ozzie/core/widgets/ozzie_card.dart';
 import 'package:ozzie/core/widgets/ozzie_placeholder.dart';
 import 'package:ozzie/core/widgets/ozzie_progress_bar.dart';
+import 'package:ozzie/features/lesson/logic/progress_controller.dart';
 
 /// 🏠 HOME SCREEN
 /// 
@@ -33,48 +35,55 @@ import 'package:ozzie/core/widgets/ozzie_progress_bar.dart';
 /// - Clear call-to-action (big buttons they can't miss)
 /// - Celebratory (every bit of progress is celebrated!)
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final progressState = ref.watch(progressControllerProvider);
     return Scaffold(
       // No app bar - we want a clean, immersive experience
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppSizes.screenPadding),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // ========== OZZIE GREETING SECTION ==========
-              _buildOzzieGreeting(context),
+        child: progressState.when(
+          data: (userProgress) => SingleChildScrollView(
+            padding: const EdgeInsets.all(AppSizes.screenPadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ========== OZZIE GREETING SECTION ==========
+                _buildOzzieGreeting(context),
 
-              const SizedBox(height: AppSizes.spaceLarge),
+                const SizedBox(height: AppSizes.spaceLarge),
 
-              // ========== STREAK COUNTER SECTION ==========
-              _buildStreakCounter(context),
+                // ========== STREAK COUNTER SECTION ==========
+                _buildStreakCounter(context, userProgress.currentStreak),
 
-              const SizedBox(height: AppSizes.spaceLarge),
+                const SizedBox(height: AppSizes.spaceLarge),
 
-              // ========== PROGRESS SECTION ==========
-              _buildProgressSection(context),
+                // ========== PROGRESS SECTION ==========
+                _buildProgressSection(context, userProgress),
 
-              const SizedBox(height: AppSizes.spaceLarge),
+                const SizedBox(height: AppSizes.spaceLarge),
 
-              // ========== RECENT BADGES SECTION ==========
-              _buildRecentBadges(context),
+                // ========== RECENT BADGES SECTION ==========
+                _buildRecentBadges(context),
 
-              const SizedBox(height: AppSizes.spaceXLarge),
+                const SizedBox(height: AppSizes.spaceXLarge),
 
-              // ========== ACTION BUTTONS ==========
-              _buildActionButtons(context),
+                // ========== ACTION BUTTONS ==========
+                _buildActionButtons(context, userProgress),
 
-              const SizedBox(height: AppSizes.spaceLarge),
+                const SizedBox(height: AppSizes.spaceLarge),
 
-              // ========== DEVELOPER TOOLS (Hidden for kids!) ==========
-              // This is just for us during development
-              _buildDeveloperTools(context),
-            ],
+                // ========== DEVELOPER TOOLS (Hidden for kids!) ==========
+                // This is just for us during development
+                _buildDeveloperTools(context),
+              ],
+            ),
+          ),
+          loading: () => const Center(child: CircularProgressIndicator()),
+          error: (err, stack) => Center(
+            child: Text('Error loading progress: $err'),
           ),
         ),
       ),
@@ -131,8 +140,7 @@ class HomeScreen extends StatelessWidget {
   }
 
   /// Daily streak counter with fire icon
-  Widget _buildStreakCounter(BuildContext context) {
-    const int currentStreak = 7; // TODO: Get from user progress state
+  Widget _buildStreakCounter(BuildContext context, int currentStreak) {
 
     return OzzieCard(
       backgroundColor: AppColors.white,
@@ -201,7 +209,19 @@ class HomeScreen extends StatelessWidget {
   }
 
   /// Progress section showing Surah completion
-  Widget _buildProgressSection(BuildContext context) {
+  Widget _buildProgressSection(BuildContext context, userProgress) {
+    final fatihaProgress = userProgress.surahProgress[1];
+    final fatihaCompleted = fatihaProgress?.versesCompleted.length ?? 0;
+    final fatihaStars = fatihaProgress?.verseStars.values.fold(0, (sum, stars) => sum + stars) ?? 0;
+    final fatihaTotal = 7;
+    final fatihaPercentage = ((fatihaCompleted / fatihaTotal) * 100).round();
+    
+    final ikhlasProgress = userProgress.surahProgress[112];
+    final ikhlasCompleted = ikhlasProgress?.versesCompleted.length ?? 0;
+    final ikhlasStars = ikhlasProgress?.verseStars.values.fold(0, (sum, stars) => sum + stars) ?? 0;
+    final ikhlasTotal = 4;
+    final ikhlasPercentage = ikhlasCompleted > 0 ? ((ikhlasCompleted / ikhlasTotal) * 100).round() : 0;
+    
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -239,12 +259,30 @@ class HomeScreen extends StatelessWidget {
                     ],
                   ),
 
-                  // Completion percentage
-                  Text(
-                    '75%',
-                    style: AppTextStyles.headingMedium.copyWith(
-                      color: AppColors.primary,
-                    ),
+                  // Stars and percentage
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (fatihaStars > 0)
+                        Row(
+                          children: [
+                            const Icon(Icons.star, color: AppColors.warning, size: 16),
+                            const SizedBox(width: 4),
+                            Text(
+                              '$fatihaStars',
+                              style: AppTextStyles.bodyMedium.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                      Text(
+                        '$fatihaPercentage%',
+                        style: AppTextStyles.headingMedium.copyWith(
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -252,19 +290,19 @@ class HomeScreen extends StatelessWidget {
               const SizedBox(height: AppSizes.spaceMedium),
 
               // Progress bar
-              const OzzieProgressBar(
-                current: 5, // 5 verses completed
-                total: 7,   // Out of 7 total verses
+              OzzieProgressBar(
+                current: fatihaCompleted,
+                total: fatihaTotal,
                 height: 12,
                 showPercentage: false,
-                showFraction: false, // We'll show text separately below
+                showFraction: false,
               ),
 
               const SizedBox(height: AppSizes.spaceSmall),
 
               // Verses completed
               Text(
-                '5 of 7 verses completed',
+                '$fatihaCompleted of $fatihaTotal verses completed',
                 style: AppTextStyles.bodySmall.copyWith(
                   color: AppColors.textSecondary,
                 ),
@@ -272,8 +310,88 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
         ),
+        
+        // Al-Ikhlas (if started or completed)
+        if (ikhlasCompleted > 0) ...[
+          const SizedBox(height: AppSizes.spaceMedium),
+          OzzieCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    // Surah name
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Surah Al-Ikhlas',
+                          style: AppTextStyles.headingSmall,
+                        ),
+                        const SizedBox(height: AppSizes.spaceXTiny),
+                        Text(
+                          'الإخلاص',
+                          style: AppTextStyles.arabicSmall.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
 
-        // Add more Surahs here later (Al-Ikhlas, etc.)
+                    // Stars and percentage
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        if (ikhlasStars > 0)
+                          Row(
+                            children: [
+                              const Icon(Icons.star, color: AppColors.warning, size: 16),
+                              const SizedBox(width: 4),
+                              Text(
+                                '$ikhlasStars',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
+                          ),
+                        Text(
+                          '$ikhlasPercentage%',
+                          style: AppTextStyles.headingMedium.copyWith(
+                            color: AppColors.secondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: AppSizes.spaceMedium),
+
+                // Progress bar
+                OzzieProgressBar(
+                  current: ikhlasCompleted,
+                  total: ikhlasTotal,
+                  height: 12,
+                  showPercentage: false,
+                  showFraction: false,
+                  color: AppColors.secondary,
+                ),
+
+                const SizedBox(height: AppSizes.spaceSmall),
+
+                // Verses completed
+                Text(
+                  '$ikhlasCompleted of $ikhlasTotal verses completed',
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -366,7 +484,13 @@ class HomeScreen extends StatelessWidget {
   }
 
   /// Main action buttons
-  Widget _buildActionButtons(BuildContext context) {
+  Widget _buildActionButtons(BuildContext context, userProgress) {
+    // Determine which Surah and verse to continue from
+    final fatihaProgress = userProgress.surahProgress[1];
+    final isFatihaCompleted = fatihaProgress?.isCompleted ?? false;
+    
+    final continueSurah = isFatihaCompleted ? 112 : 1;
+    
     return Column(
       children: [
         // Continue Learning button (primary action)
@@ -374,14 +498,8 @@ class HomeScreen extends StatelessWidget {
           text: 'Continue Learning',
           icon: Icons.play_arrow,
           onPressed: () {
-            // TODO: Navigate to last incomplete verse
-            // For now, show a message
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Lesson flow coming soon! 🚀'),
-                duration: Duration(seconds: 2),
-              ),
-            );
+            // Navigate to the current Surah's verse trail
+            context.push('/surah/$continueSurah/trail');
           },
           size: OzzieButtonSize.large,
           fullWidth: true,
@@ -391,7 +509,7 @@ class HomeScreen extends StatelessWidget {
 
         // Start New Journey button (secondary action)
         OzzieButton(
-          text: 'Start New Journey',
+          text: 'Explore Surahs',
           icon: Icons.rocket_launch,
           onPressed: () {
             // Navigate to Surah map screen

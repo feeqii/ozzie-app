@@ -45,7 +45,26 @@
           "meaning": "the Most Merciful",
           "position": 3
         }
-      ]
+      ],
+      "quiz1": {
+        "instruction": "Put the words in the correct order",
+        "question": "Arrange these words to form the verse",
+        "options": [],
+        "correctAnswerIndex": 0,
+        "explanation": "Great job! You put the words in the right order!",
+        "hint": "Listen to the recitation if you need help!"
+      },
+      "quiz2": {
+        "question": "What does 'Bismillah' mean?",
+        "options": [
+          "In the name of Allah",
+          "Praise be to Allah",
+          "There is no god but Allah",
+          "Allah is the Greatest"
+        ],
+        "correctAnswerIndex": 0,
+        "explanation": "'Bismillah' means 'In the name of Allah'. Muslims say this before starting anything to remember Allah!"
+      }
     },
     {
       "verseNumber": 2,
@@ -79,7 +98,26 @@
           "meaning": "of all the worlds",
           "position": 3
         }
-      ]
+      ],
+      "quiz1": {
+        "instruction": "Put the words in the correct order",
+        "question": "Arrange these words to form the verse",
+        "options": [],
+        "correctAnswerIndex": 0,
+        "explanation": "Excellent! You arranged the words perfectly!",
+        "hint": "Think about how we praise Allah!"
+      },
+      "quiz2": {
+        "question": "Who is this verse praising?",
+        "options": [
+          "Allah, the Lord of all worlds",
+          "The Prophet Muhammad",
+          "The angels",
+          "Our parents"
+        ],
+        "correctAnswerIndex": 0,
+        "explanation": "This verse praises Allah, who is the Lord and Creator of everything in all the worlds!"
+      }
     },
     {
       "verseNumber": 3,
@@ -101,7 +139,26 @@
           "meaning": "The Especially Merciful",
           "position": 1
         }
-      ]
+      ],
+      "quiz1": {
+        "instruction": "Put the words in the correct order",
+        "question": "Arrange these words to form the verse",
+        "options": [],
+        "correctAnswerIndex": 0,
+        "explanation": "Perfect! You know the order of Allah's beautiful names!",
+        "hint": "Both words describe Allah's mercy!"
+      },
+      "quiz2": {
+        "question": "What are the two names of Allah mentioned?",
+        "options": [
+          "Ar-Rahman and Ar-Raheem (The Most Merciful)",
+          "Al-Malik and Al-Quddus (The King and The Holy)",
+          "As-Salam and Al-Mumin (The Peace and The Believer)",
+          "Al-Aziz and Al-Hakeem (The Mighty and The Wise)"
+        ],
+        "correctAnswerIndex": 0,
+        "explanation": "Ar-Rahman means Allah is very merciful to everyone, and Ar-Raheem means He is especially merciful to believers!"
+      }
     },
     {
       "verseNumber": 4,
@@ -129,7 +186,26 @@
           "meaning": "of Judgment",
           "position": 2
         }
-      ]
+      ],
+      "quiz1": {
+        "instruction": "Put the words in the correct order",
+        "question": "Arrange these words to form the verse",
+        "options": [],
+        "correctAnswerIndex": 0,
+        "explanation": "Great work! This verse teaches us about the Day of Judgment!",
+        "hint": "Master of the Day of Judgment!"
+      },
+      "quiz2": {
+        "question": "What day is mentioned in this verse?",
+        "options": [
+          "The Day of Judgment",
+          "The Day of Friday",
+          "The Day of Eid",
+          "The Day of Arafah"
+        ],
+        "correctAnswerIndex": 0,
+        "explanation": "This verse talks about the Day of Judgment, when Allah will judge all people for their deeds!"
+      }
     },
     {
       "verseNumber": 5,
@@ -163,7 +239,26 @@
           "meaning": "we ask for help",
           "position": 3
         }
-      ]
+      ],
+      "quiz1": {
+        "instruction": "Put the words in the correct order",
+        "question": "Arrange these words to form the verse",
+        "options": [],
+        "correctAnswerIndex": 0,
+        "explanation": "Awesome! This verse is our promise to worship only Allah!",
+        "hint": "You alone we worship and ask for help!"
+      },
+      "quiz2": {
+        "question": "What do we ask Allah in this verse?",
+        "options": [
+          "To worship only Him and seek His help",
+          "To give us food and water",
+          "To make us rich",
+          "To give us many friends"
+        ],
+        "correctAnswerIndex": 0,
+        "explanation": "We promise to worship only Allah and ask only Him for help in everything we do!"
+      }
     },
     {
       "verseNumber": 6,
@@ -191,7 +286,26 @@
           "meaning": "the straight",
           "position": 2
         }
-      ]
+      ],
+      "quiz1": {
+        "instruction": "Put the words in the correct order",
+        "question": "Arrange these words to form the verse",
+        "options": [],
+        "correctAnswerIndex": 0,
+        "explanation": "Wonderful! This important prayer asks Allah for guidance!",
+        "hint": "Guide us to the straight path!"
+      },
+      "quiz2": {
+        "question": "What path do we ask Allah to guide us to?",
+        "options": [
+          "The straight path",
+          "The easy path",
+          "The wide path",
+          "The short path"
+        ],
+        "correctAnswerIndex": 0,
+        "explanation": "The straight path (As-Sirat Al-Mustaqeem) is the path of Islam that leads to Allah's pleasure and Paradise!"
+      }
     },
     {
       "verseNumber": 7,
@@ -255,7 +369,26 @@
           "meaning": "those who are astray",
           "position": 8
         }
-      ]
+      ],
+      "quiz1": {
+        "instruction": "Put the words in the correct order",
+        "question": "Arrange these words to form the verse",
+        "options": [],
+        "correctAnswerIndex": 0,
+        "explanation": "Amazing! You completed the final verse of Al-Fatiha!",
+        "hint": "This verse explains which path we want to follow!"
+      },
+      "quiz2": {
+        "question": "Who walked the straight path that we want to follow?",
+        "options": [
+          "Those Allah blessed (the Prophets and righteous people)",
+          "The angels in heaven",
+          "The rich and famous people",
+          "The kings and rulers"
+        ],
+        "correctAnswerIndex": 0,
+        "explanation": "We want to follow the path of those Allah blessed, like the Prophets, companions, and all righteous Muslims!"
+      }
     }
   ]
 }

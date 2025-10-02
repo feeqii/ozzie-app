@@ -3,7 +3,6 @@ import 'package:ozzie/core/constants/app_colors.dart';
 import 'package:ozzie/core/constants/app_sizes.dart';
 import 'package:ozzie/core/constants/app_text_styles.dart';
 import 'package:ozzie/core/widgets/ozzie_card.dart';
-import 'package:ozzie/core/widgets/ozzie_placeholder.dart';
 import 'package:ozzie/features/lesson/data/models/verse_model.dart';
 
 /// ❓ QUIZ 1 STEP SCREEN (Step 4 of 6)
@@ -35,9 +34,10 @@ class Quiz1StepScreen extends StatefulWidget {
 class _Quiz1StepScreenState extends State<Quiz1StepScreen> {
   List<String> availableWords = [];
   List<String?> slots = []; // null = empty slot, String = word in slot
-  bool hasSubmitted = false;
-  bool? isCorrect;
+  List<String> correctWords = []; // The correct word order
+  int currentSlotIndex = 0; // Which slot we're currently filling (0-based)
   bool showHint = false;
+  bool showWrongFeedback = false; // For "Try Again!" popup
 
   @override
   void initState() {
@@ -46,62 +46,70 @@ class _Quiz1StepScreenState extends State<Quiz1StepScreen> {
   }
 
   void _setupWords() {
-    // Get all words from the verse
-    final words = widget.verse.words.map((w) => w.arabic).toList();
+    // Get all words from the verse in correct order
+    correctWords = widget.verse.words.map((w) => w.arabic).toList();
     
     // Create empty slots (one for each word)
-    slots = List<String?>.filled(words.length, null);
+    slots = List<String?>.filled(correctWords.length, null);
     
     // Shuffle words for the word bank
-    availableWords = List.from(words)..shuffle();
+    availableWords = List.from(correctWords)..shuffle();
+    
+    // Start at the first slot
+    currentSlotIndex = 0;
     
     setState(() {});
   }
 
+  /// Handle word placement with immediate validation
   void _placeWordInSlot(String word, int slotIndex) {
-    if (hasSubmitted) return;
-
-    setState(() {
-      // Remove word from any existing slot
-      for (int i = 0; i < slots.length; i++) {
-        if (slots[i] == word) {
-          slots[i] = null;
+    // Only allow placing in the current active slot
+    if (slotIndex != currentSlotIndex) {
+      return; // Ignore drops on non-active slots
+    }
+    
+    // Check if this is the correct word for this position
+    final correctWord = correctWords[slotIndex];
+    
+    if (word == correctWord) {
+      // ✅ CORRECT! Lock it in and move to next slot
+      setState(() {
+        slots[slotIndex] = word;
+        currentSlotIndex++;
+        
+        // Check if we've completed all slots
+        if (currentSlotIndex >= slots.length) {
+          _onAllSlotsCorrect();
         }
-      }
+      });
+    } else {
+      // ❌ WRONG! Show feedback and bounce back
+      setState(() {
+        showWrongFeedback = true;
+      });
       
-      // Place word in new slot
-      slots[slotIndex] = word;
-    });
+      // Hide feedback after 1.5 seconds
+      Future.delayed(const Duration(milliseconds: 1500), () {
+        if (mounted) {
+          setState(() {
+            showWrongFeedback = false;
+          });
+        }
+      });
+    }
   }
 
-  void _removeWordFromSlot(int slotIndex) {
-    if (hasSubmitted) return;
+  /// Called when all slots are filled correctly
+  void _onAllSlotsCorrect() {
+    // Submit the complete answer
+    widget.onAnswerSubmit(slots.whereType<String>().toList());
     
-    setState(() {
-      slots[slotIndex] = null;
+    // Small delay then show success feedback
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) {
+        // The parent will handle navigation to next step
+      }
     });
-  }
-
-  void _checkAnswer() {
-    // Build answer from slots (slots are already in correct position order)
-    final answer = slots.whereType<String>().toList();
-    
-    // Submit answer to controller
-    final correct = widget.onAnswerSubmit(answer);
-    
-    setState(() {
-      hasSubmitted = true;
-      isCorrect = correct;
-    });
-  }
-
-  void _tryAgain() {
-    setState(() {
-      hasSubmitted = false;
-      isCorrect = null;
-      showHint = false;
-    });
-    _setupWords();
   }
 
   void _toggleHint() {
@@ -109,145 +117,216 @@ class _Quiz1StepScreenState extends State<Quiz1StepScreen> {
       showHint = !showHint;
     });
   }
+  
+  /// Check if a slot is locked (already filled correctly)
+  bool _isSlotLocked(int index) => index < currentSlotIndex;
+  
+  /// Check if a slot is the active one
+  bool _isSlotActive(int index) => index == currentSlotIndex;
+  
+  /// Check if all slots are completed
+  bool get _isCompleted => currentSlotIndex >= slots.length;
 
-  bool get _canSubmit {
-    // All slots must be filled
-    return !slots.contains(null);
+  /// Get ordinal label for slot (1st, 2nd, 3rd, etc.)
+  String _getOrdinalLabel(int index) {
+    final position = index + 1;
+    if (position == 1) return '1st word';
+    if (position == 2) return '2nd word';
+    if (position == 3) return '3rd word';
+    return '${position}th word';
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSizes.screenPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Title
-          Text(
-            'Put the Words in Order',
-            style: AppTextStyles.headingMedium.copyWith(
-              color: AppColors.primary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-
-          const SizedBox(height: AppSizes.spaceSmall),
-
-          OzzieCard(
-            backgroundColor: AppColors.info.withOpacity(0.1),
-            borderColor: AppColors.info,
-            child: Column(
-              children: [
-                const Icon(Icons.info_outline, color: AppColors.info, size: 20),
-                const SizedBox(height: AppSizes.spaceSmall),
-                Text(
-                  'Drag words in order: 1st → 2nd → 3rd → 4th',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                  textAlign: TextAlign.center,
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSizes.screenPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Title
+              Text(
+                'Put the Words in Order',
+                style: AppTextStyles.headingMedium.copyWith(
+                  color: AppColors.primary,
                 ),
-                const SizedBox(height: AppSizes.spaceSmall),
-                Text(
-                  'Hint: بِسْمِ is the FIRST word!',
-                  style: AppTextStyles.bodySmall.copyWith(
-                    fontStyle: FontStyle.italic,
-                    color: AppColors.textSecondary,
+                textAlign: TextAlign.center,
+              ),
+
+              const SizedBox(height: AppSizes.spaceSmall),
+
+              OzzieCard(
+                backgroundColor: AppColors.info.withOpacity(0.1),
+                borderColor: AppColors.info,
+                child: Column(
+                  children: [
+                    const Icon(Icons.info_outline, color: AppColors.info, size: 20),
+                    const SizedBox(height: AppSizes.spaceSmall),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Drag words starting from the ',
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        Text(
+                          'RIGHT',
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        Text(
+                          ' ←',
+                          style: AppTextStyles.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: AppSizes.spaceSmall),
+                    Text(
+                      'Place words one at a time - each must be correct!',
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontStyle: FontStyle.italic,
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: AppSizes.spaceLarge),
+
+              // Answer slots (where words go)
+              _buildAnswerSlots(),
+
+              const SizedBox(height: AppSizes.spaceXLarge),
+
+              // Available words (to drag from)
+              _buildWordBank(),
+
+              const SizedBox(height: AppSizes.spaceLarge),
+
+              // Hint button (only show if not completed)
+              if (!_isCompleted)
+                OutlinedButton.icon(
+                  onPressed: _toggleHint,
+                  icon: Icon(showHint ? Icons.visibility_off : Icons.lightbulb),
+                  label: Text(showHint ? 'Hide Hint' : 'Show Hint'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
                   ),
-                  textAlign: TextAlign.center,
+                ),
+
+              if (showHint) ...[
+                const SizedBox(height: AppSizes.spaceMedium),
+                OzzieCard(
+                  backgroundColor: AppColors.info.withOpacity(0.1),
+                  borderColor: AppColors.info,
+                  child: Column(
+                    children: [
+                      const Icon(Icons.lightbulb, color: AppColors.info),
+                      const SizedBox(height: AppSizes.spaceSmall),
+                      Text(
+                        'Hint: ${widget.verse.transliteration}',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          fontStyle: FontStyle.italic,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
                 ),
               ],
-            ),
+
+              const SizedBox(height: AppSizes.spaceLarge),
+            ],
           ),
-
-          const SizedBox(height: AppSizes.spaceLarge),
-
-          // Answer slots (where words go)
-          _buildAnswerSlots(),
-
-          const SizedBox(height: AppSizes.spaceXLarge),
-
-          // Available words (to drag from)
-          _buildWordBank(),
-
-          const SizedBox(height: AppSizes.spaceLarge),
-
-          // Hint button
-          if (!hasSubmitted)
-            OutlinedButton.icon(
-              onPressed: _toggleHint,
-              icon: Icon(showHint ? Icons.visibility_off : Icons.lightbulb),
-              label: Text(showHint ? 'Hide Hint' : 'Show Hint'),
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-              ),
-            ),
-
-          if (showHint) ...[
-            const SizedBox(height: AppSizes.spaceMedium),
-            OzzieCard(
-              backgroundColor: AppColors.info.withOpacity(0.1),
-              borderColor: AppColors.info,
-              child: Column(
-                children: [
-                  const Icon(Icons.lightbulb, color: AppColors.info),
-                  const SizedBox(height: AppSizes.spaceSmall),
-                  Text(
-                    'Hint: ${widget.verse.transliteration}',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      fontStyle: FontStyle.italic,
-                    ),
-                    textAlign: TextAlign.center,
+        ),
+        
+        // "Try Again!" popup overlay (shown when wrong word is dropped)
+        if (showWrongFeedback)
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.5),
+              child: Center(
+                child: OzzieCard(
+                  backgroundColor: AppColors.error.withOpacity(0.95),
+                  borderColor: AppColors.error,
+                  borderWidth: 3,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.close_rounded,
+                        color: Colors.white,
+                        size: 64,
+                      ),
+                      const SizedBox(height: AppSizes.spaceMedium),
+                      Text(
+                        'Try Again!',
+                        style: AppTextStyles.headingLarge.copyWith(
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: AppSizes.spaceSmall),
+                      Text(
+                        'That\'s not the right word for this spot',
+                        style: AppTextStyles.bodyLarge.copyWith(
+                          color: Colors.white,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-          ],
-
-          const SizedBox(height: AppSizes.spaceLarge),
-
-          // Check answer button
-          if (!hasSubmitted && _canSubmit)
-            ElevatedButton.icon(
-              onPressed: _checkAnswer,
-              icon: const Icon(Icons.check_circle),
-              label: const Text('Check Answer'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.cardPadding,
-                  vertical: AppSizes.spaceMedium,
                 ),
               ),
             ),
-
-          // Feedback
-          if (hasSubmitted) _buildFeedback(),
-        ],
-      ),
+          ),
+      ],
     );
   }
 
   /// Answer slots (drag targets)
   Widget _buildAnswerSlots() {
+    // Card border color: green if all complete, primary if in progress
+    final cardBorderColor = _isCompleted 
+        ? AppColors.success 
+        : AppColors.primary.withOpacity(0.3);
+    
     return OzzieCard(
       backgroundColor: AppColors.white,
-      borderColor: hasSubmitted
-          ? (isCorrect! ? AppColors.success : AppColors.error)
-          : AppColors.primary.withOpacity(0.3),
-      borderWidth: hasSubmitted ? 3 : 2,
+      borderColor: cardBorderColor,
+      borderWidth: _isCompleted ? 3 : 2,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Your Answer:',
-            style: AppTextStyles.bodySmall.copyWith(
-              color: AppColors.textSecondary,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Your Answer:',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              Text(
+                '← Read this way',
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.primary,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppSizes.spaceMedium),
           
-          // Slots displayed in a single row, horizontally scrollable if needed
+          // Slots displayed RTL (right-to-left), horizontally scrollable if needed
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             child: Row(
@@ -259,7 +338,7 @@ class _Quiz1StepScreenState extends State<Quiz1StepScreen> {
                   ),
                   child: _buildSlot(index),
                 );
-              }),
+              }).reversed.toList(), // ← RTL: Reverse visual order!
             ),
           ),
         ],
@@ -271,28 +350,50 @@ class _Quiz1StepScreenState extends State<Quiz1StepScreen> {
   Widget _buildSlot(int index) {
     final word = slots[index];
     final isEmpty = word == null;
+    final isLocked = _isSlotLocked(index);
+    final isActive = _isSlotActive(index);
 
     return DragTarget<String>(
-      onWillAccept: (data) => !hasSubmitted, // Only accept if not submitted
+      onWillAccept: (data) => isActive, // Only accept drops on the active slot
       onAccept: (data) {
         _placeWordInSlot(data, index);
       },
       builder: (context, candidateData, rejectedData) {
-        final isHovering = candidateData.isNotEmpty;
+        final isHovering = candidateData.isNotEmpty && isActive;
+        
+        // Determine colors based on state
+        Color backgroundColor;
+        Color borderColor;
+        int borderWidth;
+        
+        if (isLocked) {
+          // Locked (correct) - green
+          backgroundColor = AppColors.success.withOpacity(0.2);
+          borderColor = AppColors.success;
+          borderWidth = 3;
+        } else if (isActive) {
+          // Active slot - highlighted
+          backgroundColor = isHovering 
+              ? AppColors.primary.withOpacity(0.2) 
+              : AppColors.primary.withOpacity(0.1);
+          borderColor = isHovering ? AppColors.primary : AppColors.primary.withOpacity(0.5);
+          borderWidth = isHovering ? 3 : 2;
+        } else {
+          // Future slot - dimmed
+          backgroundColor = AppColors.lightGray.withOpacity(0.2);
+          borderColor = AppColors.mediumGray.withOpacity(0.3);
+          borderWidth = 1;
+        }
         
         return Container(
           width: 90,
           height: 100,
           decoration: BoxDecoration(
-            color: isEmpty
-                ? (isHovering ? AppColors.primary.withOpacity(0.1) : AppColors.lightGray.withOpacity(0.3))
-                : AppColors.primary.withOpacity(0.2),
+            color: backgroundColor,
             borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
             border: Border.all(
-              color: isHovering
-                  ? AppColors.primary
-                  : (isEmpty ? AppColors.mediumGray : AppColors.primary),
-              width: isHovering ? 3 : 2,
+              color: borderColor,
+              width: borderWidth.toDouble(),
             ),
           ),
           child: isEmpty
@@ -300,28 +401,29 @@ class _Quiz1StepScreenState extends State<Quiz1StepScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        '${index + 1}',
-                        style: AppTextStyles.headingMedium.copyWith(
-                          color: AppColors.mediumGray,
+                      if (isLocked)
+                        const Icon(Icons.check_circle, color: AppColors.success, size: 32)
+                      else ...[
+                        Text(
+                          '${index + 1}',
+                          style: AppTextStyles.headingMedium.copyWith(
+                            color: isActive ? AppColors.primary : AppColors.mediumGray.withOpacity(0.5),
+                            fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        index == 0 ? '1st word' 
-                        : index == 1 ? '2nd word'
-                        : index == 2 ? '3rd word'
-                        : '4th word',
-                        style: AppTextStyles.bodySmall.copyWith(
-                          color: AppColors.mediumGray,
-                          fontSize: 9,
+                        const SizedBox(height: 4),
+                        Text(
+                          _getOrdinalLabel(index),
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: isActive ? AppColors.primary : AppColors.mediumGray.withOpacity(0.5),
+                            fontSize: 9,
+                          ),
                         ),
-                      ),
+                      ],
                     ],
                   ),
                 )
-              : GestureDetector(
-                  onTap: hasSubmitted ? null : () => _removeWordFromSlot(index),
+              : Center(
                   child: Stack(
                     children: [
                       Center(
@@ -332,14 +434,22 @@ class _Quiz1StepScreenState extends State<Quiz1StepScreen> {
                           textDirection: TextDirection.rtl,
                         ),
                       ),
-                      if (!hasSubmitted)
+                      // Locked indicator (checkmark)
+                      if (isLocked)
                         Positioned(
                           top: 2,
                           right: 2,
-                          child: Icon(
-                            Icons.cancel,
-                            size: 16,
-                            color: AppColors.error.withOpacity(0.7),
+                          child: Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: const BoxDecoration(
+                              color: AppColors.success,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.check,
+                              size: 12,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
                     ],
@@ -353,8 +463,23 @@ class _Quiz1StepScreenState extends State<Quiz1StepScreen> {
   /// Word bank (draggable words)
   Widget _buildWordBank() {
     // Filter out words that are already placed in slots
-    final wordsInSlots = slots.whereType<String>().toSet();
-    final draggableWords = availableWords.where((word) => !wordsInSlots.contains(word)).toList();
+    // We need to handle duplicate words, so we track by index instead of value
+    final List<String> draggableWords = [];
+    
+    for (int i = 0; i < availableWords.length; i++) {
+      final word = availableWords[i];
+      
+      // Count how many times this word appears in slots
+      final countInSlots = slots.where((slotWord) => slotWord == word).length;
+      
+      // Count how many times this word appears in available words up to current index
+      final countInAvailable = availableWords.sublist(0, i + 1).where((w) => w == word).length;
+      
+      // Only include this word if we haven't used all instances yet
+      if (countInAvailable > countInSlots) {
+        draggableWords.add(word);
+      }
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -390,11 +515,6 @@ class _Quiz1StepScreenState extends State<Quiz1StepScreen> {
 
   /// Draggable word
   Widget _buildDraggableWord(String word) {
-    if (hasSubmitted) {
-      // Not draggable after submission
-      return _buildWordChip(word, isDragging: false);
-    }
-
     return Draggable<String>(
       data: word,
       feedback: Material(
@@ -447,80 +567,4 @@ class _Quiz1StepScreenState extends State<Quiz1StepScreen> {
     );
   }
 
-  /// Feedback after submission
-  Widget _buildFeedback() {
-    return Column(
-      children: [
-        const SizedBox(height: AppSizes.spaceLarge),
-        
-        OzziePlaceholder(
-          size: OzzieSize.medium,
-          expression: isCorrect! 
-              ? OzzieExpression.celebrating 
-              : OzzieExpression.thinking,
-          animated: true,
-        ),
-
-        const SizedBox(height: AppSizes.spaceMedium),
-
-        OzzieCard(
-          backgroundColor: isCorrect!
-              ? AppColors.success.withOpacity(0.1)
-              : AppColors.error.withOpacity(0.1),
-          borderColor: isCorrect! ? AppColors.success : AppColors.error,
-          borderWidth: 2,
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    isCorrect! ? Icons.emoji_events : Icons.info,
-                    color: isCorrect! ? AppColors.success : AppColors.error,
-                    size: 32,
-                  ),
-                  const SizedBox(width: AppSizes.spaceSmall),
-                  Text(
-                    isCorrect! ? 'Perfect!' : 'Not Quite',
-                    style: AppTextStyles.headingMedium.copyWith(
-                      color: isCorrect! ? AppColors.success : AppColors.error,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSizes.spaceMedium),
-              Text(
-                isCorrect!
-                    ? 'Amazing! You put all the words in the right order! 🎉'
-                    : 'Not quite right. Try again! Remember: ${widget.verse.transliteration}',
-                style: AppTextStyles.bodyLarge,
-                textAlign: TextAlign.center,
-              ),
-              if (!isCorrect!) ...[
-                const SizedBox(height: AppSizes.spaceMedium),
-                OutlinedButton.icon(
-                  onPressed: _tryAgain,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Try Again'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.error,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
-
-        if (isCorrect!) ...[
-          const SizedBox(height: AppSizes.spaceMedium),
-          Text(
-            'Tap "Next" to continue! 🚀',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
 }

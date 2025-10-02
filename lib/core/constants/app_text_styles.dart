@@ -139,6 +139,22 @@ class AppTextStyles {
     height: 1.6,
   );
 
+  /// Arabic medium - for medium Arabic text
+  static TextStyle get arabicMedium => _amiriBase.copyWith(
+    fontSize: 24,
+    fontWeight: FontWeight.normal,
+    color: AppColors.textPrimary,
+    height: 1.6,
+  );
+
+  /// Arabic large - for large Arabic text (verse display)
+  static TextStyle get arabicLarge => _amiriBase.copyWith(
+    fontSize: 32,
+    fontWeight: FontWeight.bold,
+    color: AppColors.textPrimary,
+    height: 1.8,
+  );
+
   // ========== SPECIAL TEXT STYLES ==========
 
   /// Ozzie mascot speech - playful, fun text

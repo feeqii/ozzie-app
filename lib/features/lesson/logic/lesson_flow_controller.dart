@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ozzie/features/lesson/data/models/verse_model.dart';
 import 'package:ozzie/features/lesson/logic/lesson_flow_state.dart';
+import 'package:ozzie/features/lesson/logic/progress_controller.dart';
 import 'package:ozzie/services/quran_data_service.dart';
 
 /// 🧠 LESSON FLOW CONTROLLER
@@ -29,22 +30,28 @@ import 'package:ozzie/services/quran_data_service.dart';
 class LessonFlowController extends StateNotifier<LessonFlowState> {
   /// Reference to QuranDataService to load verse data
   final QuranDataService _quranDataService;
+  
+  /// Reference to Riverpod ref for accessing other providers
+  final Ref _ref;
 
   /// Initialize with a starting state
   /// 
   /// Example:
   /// ```dart
   /// final controller = LessonFlowController(
+  ///   ref: ref,
   ///   quranDataService: QuranDataService(),
   ///   surahNumber: 1,
   ///   verseNumber: 1,
   /// );
   /// ```
   LessonFlowController({
+    required Ref ref,
     required QuranDataService quranDataService,
     required int surahNumber,
     required int verseNumber,
-  })  : _quranDataService = quranDataService,
+  })  : _ref = ref,
+        _quranDataService = quranDataService,
         super(LessonFlowState(
           surahNumber: surahNumber,
           verseNumber: verseNumber,
@@ -253,11 +260,24 @@ class LessonFlowController extends StateNotifier<LessonFlowState> {
     _saveProgress();
   }
 
-  /// Save progress (placeholder for now)
+  /// Save progress to Hive
   Future<void> _saveProgress() async {
-    // TODO: Implement with Hive or Firebase
-    // For now, just print
-    print('💾 Saving progress: ${state.surahNumber}:${state.verseNumber} - ${state.starsEarned} stars');
+    try {
+      // Get progress controller
+      final progressController = _ref.read(progressControllerProvider.notifier);
+      
+      // Save verse completion with stars
+      await progressController.saveVerseCompletion(
+        surahNumber: state.surahNumber,
+        verseNumber: state.verseNumber,
+        stars: state.starsEarned,
+      );
+      
+      print('💾 Progress saved successfully: ${state.surahNumber}:${state.verseNumber} - ${state.starsEarned} stars');
+    } catch (e) {
+      print('❌ Error saving progress: $e');
+      // Don't throw - we don't want to crash the app if saving fails
+    }
   }
 
   // ========== HELPER METHODS ==========
@@ -292,16 +312,16 @@ class LessonFlowController extends StateNotifier<LessonFlowState> {
 /// USAGE:
 /// ```dart
 /// // In a widget
-/// final lessonController = ref.watch(lessonFlowProvider(
+/// final lessonController = ref.watch(lessonFlowProvider((
 ///   surahNumber: 1,
 ///   verseNumber: 1,
-/// ));
+/// )));
 /// 
 /// // Access state
 /// final currentStep = lessonController.currentStep;
 /// 
 /// // Call methods
-/// ref.read(lessonFlowProvider(surahNumber: 1, verseNumber: 1).notifier)
+/// ref.read(lessonFlowProvider((surahNumber: 1, verseNumber: 1)).notifier)
 ///    .nextStep();
 /// ```
 final lessonFlowProvider = StateNotifierProvider.family<
@@ -310,6 +330,7 @@ final lessonFlowProvider = StateNotifierProvider.family<
     ({int surahNumber, int verseNumber})>(
   (ref, params) {
     return LessonFlowController(
+      ref: ref,
       quranDataService: QuranDataService(),
       surahNumber: params.surahNumber,
       verseNumber: params.verseNumber,
