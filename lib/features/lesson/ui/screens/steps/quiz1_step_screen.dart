@@ -408,16 +408,15 @@ class _Quiz1StepScreenState extends State<Quiz1StepScreen> with TickerProviderSt
             // Horizontal scrollable slots (RTL)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              reverse: true, // Start from right for RTL
               child: Row(
                 children: List.generate(slots.length, (index) {
                   return Padding(
                     padding: EdgeInsets.only(
-                      left: index < slots.length - 1 ? AppSizes.spaceSmall : 0,
+                      right: index < slots.length - 1 ? AppSizes.spaceSmall : 0,
                     ),
                     child: _buildSlot(index),
                   );
-                }).toList(), // No reverse - already RTL with reverse scroll
+                }).reversed.toList(), // Reversed: slot 1 appears on RIGHT
               ),
             ),
             
