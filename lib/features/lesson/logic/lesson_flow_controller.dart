@@ -107,7 +107,16 @@ class LessonFlowController extends StateNotifier<LessonFlowState> {
 
     final nextStep = state.currentStep.next;
     if (nextStep != null) {
-      state = state.copyWith(currentStep: nextStep);
+      // If moving TO celebration step, calculate stars first
+      if (nextStep == LessonStep.celebration) {
+        final stars = _calculateStars();
+        state = state.copyWith(
+          currentStep: nextStep,
+          starsEarned: stars,
+        );
+      } else {
+        state = state.copyWith(currentStep: nextStep);
+      }
     }
   }
 
