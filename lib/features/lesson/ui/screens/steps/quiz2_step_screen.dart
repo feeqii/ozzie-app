@@ -4,6 +4,7 @@ import 'package:ozzie/core/constants/app_sizes.dart';
 import 'package:ozzie/core/constants/app_text_styles.dart';
 import 'package:ozzie/core/widgets/ozzie_card.dart';
 import 'package:ozzie/core/widgets/ozzie_placeholder.dart';
+import 'package:ozzie/core/widgets/micro_celebration.dart';
 import 'package:ozzie/features/lesson/data/models/verse_model.dart';
 import 'package:ozzie/features/lesson/data/models/quiz_model.dart';
 
@@ -25,11 +26,13 @@ import 'package:ozzie/features/lesson/data/models/quiz_model.dart';
 class Quiz2StepScreen extends StatefulWidget {
   final Verse verse;
   final Function({required String answer, required String correctAnswer}) onAnswerSubmit;
+  final VoidCallback? onStepComplete; // Callback when quiz is done
 
   const Quiz2StepScreen({
     super.key,
     required this.verse,
     required this.onAnswerSubmit,
+    this.onStepComplete,
   });
 
   @override
@@ -97,6 +100,21 @@ class _Quiz2StepScreenState extends State<Quiz2StepScreen> {
       hasSubmitted = true;
       isCorrect = correct;
     });
+    
+    // If correct, show micro celebration and auto-advance
+    if (correct && mounted) {
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (mounted) {
+          MicroCelebration.show(
+            context,
+            onComplete: () {
+              // Auto-advance to next step after celebration
+              widget.onStepComplete?.call();
+            },
+          );
+        }
+      });
+    }
   }
 
   void _tryAgain() {

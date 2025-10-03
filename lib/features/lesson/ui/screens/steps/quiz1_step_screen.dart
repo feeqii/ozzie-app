@@ -4,6 +4,7 @@ import 'package:ozzie/core/constants/app_colors.dart';
 import 'package:ozzie/core/constants/app_sizes.dart';
 import 'package:ozzie/core/constants/app_text_styles.dart';
 import 'package:ozzie/core/widgets/ozzie_card.dart';
+import 'package:ozzie/core/widgets/micro_celebration.dart';
 import 'package:ozzie/features/lesson/data/models/verse_model.dart';
 
 /// ❓ QUIZ 1 STEP SCREEN (Step 4 of 6) - REDESIGNED
@@ -20,11 +21,13 @@ import 'package:ozzie/features/lesson/data/models/verse_model.dart';
 class Quiz1StepScreen extends StatefulWidget {
   final Verse verse;
   final Function(List<String>) onAnswerSubmit;
+  final VoidCallback? onStepComplete; // Callback when quiz is done
 
   const Quiz1StepScreen({
     super.key,
     required this.verse,
     required this.onAnswerSubmit,
+    this.onStepComplete,
   });
 
   @override
@@ -169,11 +172,19 @@ class _Quiz1StepScreenState extends State<Quiz1StepScreen> with TickerProviderSt
 
   /// Called when all slots are filled correctly
   void _onAllSlotsCorrect() {
-    // Haptic feedback for completion
-    HapticFeedback.heavyImpact();
-    
     // Submit the complete answer
     widget.onAnswerSubmit(slots.whereType<String>().toList());
+    
+    // Show micro celebration and auto-advance
+    if (mounted) {
+      MicroCelebration.show(
+        context,
+        onComplete: () {
+          // Auto-advance to next step after celebration
+          widget.onStepComplete?.call();
+        },
+      );
+    }
   }
 
   void _toggleHint() {

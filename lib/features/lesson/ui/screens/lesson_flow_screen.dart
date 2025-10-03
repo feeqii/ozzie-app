@@ -85,7 +85,11 @@ class LessonFlowScreen extends ConsumerWidget {
             ),
 
             // ========== NAVIGATION BUTTONS ==========
-            if (!lessonState.isLoading && lessonState.error == null)
+            // Hide navigation for quiz steps (they auto-advance after micro celebration)
+            if (!lessonState.isLoading && 
+                lessonState.error == null &&
+                lessonState.currentStep != LessonStep.quiz1 &&
+                lessonState.currentStep != LessonStep.quiz2)
               _buildNavigationButtons(
                 context,
                 ref,
@@ -276,12 +280,20 @@ class LessonFlowScreen extends ConsumerWidget {
         return Quiz1StepScreen(
           verse: state.verse!,
           onAnswerSubmit: controller.submitQuiz1,
+          onStepComplete: () {
+            // Auto-advance after micro celebration
+            controller.nextStep();
+          },
         );
       
       case LessonStep.quiz2:
         return Quiz2StepScreen(
           verse: state.verse!,
           onAnswerSubmit: controller.submitQuiz2,
+          onStepComplete: () {
+            // Auto-advance after micro celebration
+            controller.nextStep();
+          },
         );
       
       case LessonStep.celebration:
