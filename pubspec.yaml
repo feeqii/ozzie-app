@@ -47,13 +47,14 @@ dependencies:
   # Audio - for playing Quranic recitations
   audioplayers: ^6.1.0
   
-  # Audio Recording - for recording user's recitation
-  # TODO: Re-enable when switching to flutter_sound or record package is fixed
-  # record: 5.0.4
+  # Audio Recording - for recording user's recitation (using flutter_sound)
+  flutter_sound: ^9.2.13
   
   # Permissions - for microphone access
-  # TODO: Re-enable when recording feature is active
-  # permission_handler: ^11.0.0
+  permission_handler: ^11.3.1
+  
+  # Path provider - for getting file paths
+  path_provider: ^2.1.5
   
   # Local Storage - for saving user progress
   hive: ^2.2.3

@@ -58,7 +58,7 @@ class SurahMapScreen extends ConsumerWidget {
       child: Row(
         children: [
           IconButton(
-            onPressed: () => context.pop(),
+            onPressed: () => context.go('/'),
             icon: const Icon(Icons.arrow_back_ios, color: AppColors.white),
           ),
           Expanded(

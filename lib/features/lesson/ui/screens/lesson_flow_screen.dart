@@ -4,13 +4,13 @@ import 'package:go_router/go_router.dart';
 import 'package:ozzie/core/constants/app_colors.dart';
 import 'package:ozzie/core/constants/app_sizes.dart';
 import 'package:ozzie/core/constants/app_text_styles.dart';
+import 'package:ozzie/core/widgets/micro_celebration.dart';
 import 'package:ozzie/features/lesson/logic/lesson_flow_controller.dart';
 import 'package:ozzie/features/lesson/logic/lesson_flow_state.dart';
 import 'package:ozzie/features/lesson/logic/progress_controller.dart';
 import 'package:ozzie/features/lesson/ui/screens/steps/explanation_step_screen.dart';
 import 'package:ozzie/features/lesson/ui/screens/steps/recitation_step_screen.dart';
-// TODO: Re-enable when record package issue is fixed or switched to flutter_sound
-// import 'package:ozzie/features/lesson/ui/screens/steps/recording_step_screen.dart';
+import 'package:ozzie/features/lesson/ui/screens/steps/recording_step_screen.dart';
 import 'package:ozzie/features/lesson/ui/screens/steps/quiz1_step_screen.dart';
 import 'package:ozzie/features/lesson/ui/screens/steps/quiz2_step_screen.dart';
 import 'package:ozzie/features/lesson/ui/screens/steps/celebration_step_screen.dart';
@@ -235,45 +235,14 @@ class LessonFlowScreen extends ConsumerWidget {
         return RecitationStepScreen(verse: state.verse!);
       
       case LessonStep.recording:
-        // TODO: Re-enable when record package issue is fixed
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(AppSizes.screenPadding),
-            child: OzzieCard(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(
-                    Icons.mic_off,
-                    size: 64,
-                    color: AppColors.textSecondary,
-                  ),
-                  const SizedBox(height: AppSizes.spaceLarge),
-                  Text(
-                    'Recording Feature',
-                    style: AppTextStyles.headingMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSizes.spaceSmall),
-                  Text(
-                    'Coming Soon!',
-                    style: AppTextStyles.bodyLarge.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: AppSizes.spaceMedium),
-                  Text(
-                    'The recording step is temporarily disabled due to a package compatibility issue. We\'ll add it back soon with flutter_sound!',
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textSecondary,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          ),
+        return RecordingStepScreen(
+          verse: state.verse!,
+          onRecordingSubmit: ({required String recordingPath, int? aiScore}) {
+            controller.submitRecording(
+              recordingPath: recordingPath,
+              aiScore: aiScore,
+            );
+          },
         );
       
       case LessonStep.quiz1:
@@ -339,8 +308,20 @@ class LessonFlowScreen extends ConsumerWidget {
                         controller.completeLesson();
                         _handleLessonCompletion(context, ref, state);
                       } else {
-                        // Move to next step
-                        controller.nextStep();
+                        // For passive steps (1-3), show micro celebration then advance
+                        if (state.currentStep == LessonStep.explanation ||
+                            state.currentStep == LessonStep.recitation ||
+                            state.currentStep == LessonStep.recording) {
+                          MicroCelebration.show(
+                            context,
+                            onComplete: () {
+                              controller.nextStep();
+                            },
+                          );
+                        } else {
+                          // Other steps advance directly
+                          controller.nextStep();
+                        }
                       }
                     }
                   : null, // Disabled if can't go next

@@ -94,6 +94,13 @@ class _VerseTrailScreenState extends ConsumerState<VerseTrailScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            // Navigate back to Surah Map (planet selection)
+            context.go('/surah-map');
+          },
+        ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

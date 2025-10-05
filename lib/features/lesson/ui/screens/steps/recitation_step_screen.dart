@@ -47,7 +47,36 @@ class _RecitationStepScreenState extends State<RecitationStepScreen> {
   void initState() {
     super.initState();
     _audioPlayer = AudioPlayer();
+    _configureAudioSession();
     _setupAudioPlayer();
+  }
+  
+  /// Configure audio to play through SPEAKER (not earpiece!)
+  Future<void> _configureAudioSession() async {
+    try {
+      // Set audio context to play through speaker like music/media
+      await _audioPlayer.setAudioContext(
+        AudioContext(
+          iOS: AudioContextIOS(
+            category: AVAudioSessionCategory.playback,
+            options: {
+              AVAudioSessionOptions.defaultToSpeaker,
+              AVAudioSessionOptions.mixWithOthers,
+            },
+          ),
+          android: AudioContextAndroid(
+            isSpeakerphoneOn: true,
+            stayAwake: true,
+            contentType: AndroidContentType.music,
+            usageType: AndroidUsageType.media,
+            audioFocus: AndroidAudioFocus.gain,
+          ),
+        ),
+      );
+      print('✅ Audio configured to play through speaker');
+    } catch (e) {
+      print('⚠️ Could not configure audio session: $e');
+    }
   }
 
   @override

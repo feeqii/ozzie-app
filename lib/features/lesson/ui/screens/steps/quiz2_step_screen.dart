@@ -1,27 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:ozzie/core/constants/app_colors.dart';
 import 'package:ozzie/core/constants/app_sizes.dart';
 import 'package:ozzie/core/constants/app_text_styles.dart';
 import 'package:ozzie/core/widgets/ozzie_card.dart';
-import 'package:ozzie/core/widgets/ozzie_placeholder.dart';
 import 'package:ozzie/core/widgets/micro_celebration.dart';
 import 'package:ozzie/features/lesson/data/models/verse_model.dart';
 import 'package:ozzie/features/lesson/data/models/quiz_model.dart';
 
 /// ❓ QUIZ 2 STEP SCREEN (Step 5 of 6)
 /// 
-/// Comprehension quiz - Test understanding!
+/// Comprehension quiz - One-page, Duolingo-inspired experience!
 /// 
-/// WHAT THIS DOES:
-/// - Shows a comprehension question about the verse
-/// - 4 multiple choice answers
-/// - Kid selects one answer
-/// - Submit button
-/// - Immediate feedback (correct/incorrect)
-/// - Explanation if wrong
+/// FLOW:
+/// - Shows comprehension question
+/// - 4 multiple choice options (A, B, C, D)
+/// - Wrong answer → Shake + haptic + bottom toast → Auto-reset
+/// - Correct answer → Green highlight → Micro celebration → Auto-advance
+/// - No scrolling, no explanation cards, clean one-page UX
 /// 
-/// NOTE: Quiz questions now loaded from JSON! 🎉
-/// Each verse has its quiz2 data in the JSON file.
+/// NOTE: Quiz questions loaded from JSON! 🎉
 
 class Quiz2StepScreen extends StatefulWidget {
   final Verse verse;
@@ -39,13 +37,42 @@ class Quiz2StepScreen extends StatefulWidget {
   State<Quiz2StepScreen> createState() => _Quiz2StepScreenState();
 }
 
-class _Quiz2StepScreenState extends State<Quiz2StepScreen> {
+class _Quiz2StepScreenState extends State<Quiz2StepScreen> with SingleTickerProviderStateMixin {
   String? selectedAnswer;
-  bool hasSubmitted = false;
-  bool? isCorrect;
+  bool isProcessing = false;
+  String? wrongAnswerMessage;
+  
+  late AnimationController _shakeController;
+  late Animation<double> _shakeAnimation;
 
   // Quiz data loaded from verse
   Quiz? get quiz => widget.verse.quiz2;
+
+  @override
+  void initState() {
+    super.initState();
+    
+    // Shake animation for wrong answers
+    _shakeController = AnimationController(
+      duration: const Duration(milliseconds: 500),
+      vsync: this,
+    );
+    
+    _shakeAnimation = Tween<double>(begin: 0, end: 10).chain(
+      CurveTween(curve: Curves.elasticIn),
+    ).animate(_shakeController)
+      ..addStatusListener((status) {
+        if (status == AnimationStatus.completed) {
+          _shakeController.reverse();
+        }
+      });
+  }
+
+  @override
+  void dispose() {
+    _shakeController.dispose();
+    super.dispose();
+  }
 
   /// Get quiz question - now from JSON data!
   /// 
@@ -78,176 +105,183 @@ class _Quiz2StepScreenState extends State<Quiz2StepScreen> {
   }
 
   void _selectAnswer(String answer) {
-    if (hasSubmitted) return; // Can't change after submission
+    if (isProcessing) return; // Prevent multiple taps
+    
+    final question = _getQuestion();
+    final isCorrect = answer == question.correctAnswer;
     
     setState(() {
       selectedAnswer = answer;
+      isProcessing = true;
     });
-  }
-
-  void _submitAnswer() {
-    if (selectedAnswer == null) return;
-    
-    final question = _getQuestion();
     
     // Submit to controller
-    final correct = widget.onAnswerSubmit(
-      answer: selectedAnswer!,
+    widget.onAnswerSubmit(
+      answer: answer,
       correctAnswer: question.correctAnswer,
     );
     
-    setState(() {
-      hasSubmitted = true;
-      isCorrect = correct;
-    });
-    
-    // If correct, show micro celebration and auto-advance
-    if (correct && mounted) {
+    if (isCorrect) {
+      // ✅ CORRECT: Wait → Micro celebration → Auto-advance
       Future.delayed(const Duration(milliseconds: 500), () {
         if (mounted) {
           MicroCelebration.show(
             context,
             onComplete: () {
-              // Auto-advance to next step after celebration
               widget.onStepComplete?.call();
             },
           );
         }
       });
+    } else {
+      // ❌ WRONG: Shake + haptic + toast → Auto-reset
+      HapticFeedback.heavyImpact();
+      _shakeController.forward();
+      
+      setState(() {
+        wrongAnswerMessage = "Not quite! Try again 💭";
+      });
+      
+      // Auto-reset after 1 second
+      Future.delayed(const Duration(milliseconds: 1000), () {
+        if (mounted) {
+          setState(() {
+            selectedAnswer = null;
+            isProcessing = false;
+            wrongAnswerMessage = null;
+          });
+        }
+      });
     }
-  }
-
-  void _tryAgain() {
-    setState(() {
-      selectedAnswer = null;
-      hasSubmitted = false;
-      isCorrect = null;
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     final question = _getQuestion();
     
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSizes.screenPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Title
-          Text(
-            'Understanding Check',
-            style: AppTextStyles.headingMedium.copyWith(
-              color: AppColors.primary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-
-          const SizedBox(height: AppSizes.spaceSmall),
-
-          Text(
-            'Show what you learned!',
-            style: AppTextStyles.bodyLarge,
-            textAlign: TextAlign.center,
-          ),
-
-          const SizedBox(height: AppSizes.spaceLarge),
-
-          // Question card
-          OzzieCard(
-            backgroundColor: AppColors.primary.withOpacity(0.1),
-            borderColor: AppColors.primary.withOpacity(0.3),
-            borderWidth: 2,
-            child: Column(
-              children: [
-                Icon(
-                  Icons.quiz,
-                  size: 48,
-                  color: AppColors.primary,
-                ),
-                const SizedBox(height: AppSizes.spaceMedium),
-                Text(
-                  question.question,
-                  style: AppTextStyles.headingSmall.copyWith(
-                    fontSize: 20,
+    return Stack(
+      children: [
+        // Main content
+        Padding(
+          padding: const EdgeInsets.all(AppSizes.screenPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Compact header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Understanding Check',
+                    style: AppTextStyles.headingMedium.copyWith(
+                      color: AppColors.primary,
+                      fontSize: 20,
+                    ),
                   ),
-                  textAlign: TextAlign.center,
+                  // Info icon (optional - could show hints later)
+                  IconButton(
+                    icon: const Icon(Icons.info_outline, color: AppColors.primary),
+                    onPressed: () {
+                      // Could show explanation or hint
+                    },
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: AppSizes.spaceMedium),
+
+              // Question card - more compact
+              AnimatedBuilder(
+                animation: _shakeAnimation,
+                builder: (context, child) {
+                  return Transform.translate(
+                    offset: Offset(_shakeAnimation.value, 0),
+                    child: child,
+                  );
+                },
+                child: OzzieCard(
+                  backgroundColor: AppColors.primary.withOpacity(0.05),
+                  borderColor: AppColors.primary.withOpacity(0.2),
+                  borderWidth: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppSizes.cardPadding),
+                    child: Text(
+                      question.question,
+                      style: AppTextStyles.headingSmall.copyWith(
+                        fontSize: 18,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
                 ),
-              ],
-            ),
+              ),
+
+              const SizedBox(height: AppSizes.spaceLarge),
+
+              // Answer options - more compact
+              Expanded(
+                child: ListView(
+                  children: question.options.asMap().entries.map((entry) {
+                    final index = entry.key;
+                    final option = entry.value;
+                    final isSelected = selectedAnswer == option;
+                    final isCorrect = option == question.correctAnswer;
+                    
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: AppSizes.spaceSmall),
+                      child: _buildAnswerOption(
+                        option: option,
+                        index: index,
+                        isSelected: isSelected,
+                        showAsCorrect: isSelected && isCorrect && isProcessing,
+                      ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
           ),
+        ),
 
-          const SizedBox(height: AppSizes.spaceLarge),
-
-          // Answer options
-          ...question.options.asMap().entries.map((entry) {
-            final index = entry.key;
-            final option = entry.value;
-            final isSelected = selectedAnswer == option;
-            final isCorrectOption = option == question.correctAnswer;
-            
-            return Padding(
-              padding: const EdgeInsets.only(bottom: AppSizes.spaceMedium),
-              child: _buildAnswerOption(
-                option: option,
-                index: index,
-                isSelected: isSelected,
-                isCorrectOption: isCorrectOption,
-              ),
-            );
-          }),
-
-          const SizedBox(height: AppSizes.spaceLarge),
-
-          // Submit button
-          if (!hasSubmitted && selectedAnswer != null)
-            ElevatedButton.icon(
-              onPressed: _submitAnswer,
-              icon: const Icon(Icons.check_circle),
-              label: const Text('Submit Answer'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSizes.cardPadding,
-                  vertical: AppSizes.spaceMedium,
-                ),
-              ),
-            ),
-
-          // Feedback
-          if (hasSubmitted) _buildFeedback(),
-        ],
-      ),
+        // Bottom toast for wrong answers
+        if (wrongAnswerMessage != null)
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: _buildBottomToast(),
+          ),
+      ],
     );
   }
 
-  /// Answer option button
+  /// Answer option button - clean, one-page design
   Widget _buildAnswerOption({
     required String option,
     required int index,
     required bool isSelected,
-    required bool isCorrectOption,
+    required bool showAsCorrect,
   }) {
-    // Determine color
-    Color? backgroundColor;
-    Color? borderColor;
+    // Determine color based on state
+    Color backgroundColor;
+    Color borderColor;
     
-    if (hasSubmitted) {
-      if (isCorrectOption) {
-        backgroundColor = AppColors.success.withOpacity(0.2);
-        borderColor = AppColors.success;
-      } else if (isSelected) {
-        backgroundColor = AppColors.error.withOpacity(0.2);
-        borderColor = AppColors.error;
-      } else {
-        backgroundColor = AppColors.white;
-        borderColor = AppColors.lightGray;
-      }
+    if (showAsCorrect) {
+      // Correct answer selected
+      backgroundColor = AppColors.success.withOpacity(0.2);
+      borderColor = AppColors.success;
+    } else if (isSelected && isProcessing) {
+      // Wrong answer selected (during processing)
+      backgroundColor = AppColors.error.withOpacity(0.2);
+      borderColor = AppColors.error;
+    } else if (isSelected) {
+      // Selected but not yet processed
+      backgroundColor = AppColors.primary.withOpacity(0.1);
+      borderColor = AppColors.primary;
     } else {
-      backgroundColor = isSelected 
-          ? AppColors.primary.withOpacity(0.2) 
-          : AppColors.white;
-      borderColor = isSelected ? AppColors.primary : AppColors.lightGray;
+      // Default state
+      backgroundColor = AppColors.white;
+      borderColor = AppColors.lightGray;
     }
 
     // Letter labels (A, B, C, D)
@@ -255,23 +289,26 @@ class _Quiz2StepScreenState extends State<Quiz2StepScreen> {
     final label = labels[index];
 
     return GestureDetector(
-      onTap: hasSubmitted ? null : () => _selectAnswer(option),
+      onTap: isProcessing ? null : () => _selectAnswer(option),
       child: Container(
-        padding: const EdgeInsets.all(AppSizes.cardPadding),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSizes.cardPadding,
+          vertical: AppSizes.spaceMedium,
+        ),
         decoration: BoxDecoration(
           color: backgroundColor,
           borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
           border: Border.all(
-            color: borderColor!,
-            width: isSelected || (hasSubmitted && isCorrectOption) ? 3 : 2,
+            color: borderColor,
+            width: isSelected ? 3 : 2,
           ),
         ),
         child: Row(
           children: [
             // Letter badge
             Container(
-              width: 36,
-              height: 36,
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
                 color: borderColor,
                 shape: BoxShape.circle,
@@ -281,6 +318,7 @@ class _Quiz2StepScreenState extends State<Quiz2StepScreen> {
                   label,
                   style: AppTextStyles.button.copyWith(
                     color: AppColors.white,
+                    fontSize: 14,
                   ),
                 ),
               ),
@@ -292,19 +330,19 @@ class _Quiz2StepScreenState extends State<Quiz2StepScreen> {
             Expanded(
               child: Text(
                 option,
-                style: AppTextStyles.bodyLarge.copyWith(
+                style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                 ),
               ),
             ),
 
-            // Check/X icon (after submission)
-            if (hasSubmitted) ...[
+            // Icons only for selected answers
+            if (isSelected && isProcessing) ...[
               const SizedBox(width: AppSizes.spaceSmall),
-              if (isCorrectOption)
-                const Icon(Icons.check_circle, color: AppColors.success, size: 28)
-              else if (isSelected)
-                const Icon(Icons.cancel, color: AppColors.error, size: 28),
+              if (showAsCorrect)
+                const Icon(Icons.check_circle, color: AppColors.success, size: 24)
+              else
+                const Icon(Icons.cancel, color: AppColors.error, size: 24),
             ],
           ],
         ),
@@ -312,82 +350,43 @@ class _Quiz2StepScreenState extends State<Quiz2StepScreen> {
     );
   }
 
-  /// Feedback after submission
-  Widget _buildFeedback() {
-    final question = _getQuestion();
-    
-    return Column(
-      children: [
-        const SizedBox(height: AppSizes.spaceLarge),
-        
-        // Ozzie feedback
-        OzziePlaceholder(
-          size: OzzieSize.medium,
-          expression: isCorrect! 
-              ? OzzieExpression.celebrating 
-              : OzzieExpression.thinking,
-          animated: true,
-        ),
-
-        const SizedBox(height: AppSizes.spaceMedium),
-
-        // Feedback card
-        OzzieCard(
-          backgroundColor: isCorrect!
-              ? AppColors.success.withOpacity(0.1)
-              : AppColors.warning.withOpacity(0.1),
-          borderColor: isCorrect! ? AppColors.success : AppColors.warning,
-          borderWidth: 2,
-          child: Column(
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    isCorrect! ? Icons.emoji_events : Icons.info,
-                    color: isCorrect! ? AppColors.success : AppColors.warning,
-                    size: 32,
-                  ),
-                  const SizedBox(width: AppSizes.spaceSmall),
-                  Text(
-                    isCorrect! ? 'Correct!' : 'Not Quite',
-                    style: AppTextStyles.headingMedium.copyWith(
-                      color: isCorrect! ? AppColors.success : AppColors.warning,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSizes.spaceMedium),
-              Text(
-                question.explanation,
-                style: AppTextStyles.bodyLarge,
-                textAlign: TextAlign.center,
-              ),
-              if (!isCorrect!) ...[
-                const SizedBox(height: AppSizes.spaceMedium),
-                OutlinedButton.icon(
-                  onPressed: _tryAgain,
-                  icon: const Icon(Icons.refresh),
-                  label: const Text('Try Again'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.warning,
-                  ),
-                ),
-              ],
-            ],
+  /// Bottom toast for wrong answers (like Quiz 1)
+  Widget _buildBottomToast() {
+    return Container(
+      margin: const EdgeInsets.all(AppSizes.screenPadding),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSizes.cardPadding,
+        vertical: AppSizes.spaceMedium,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.error.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(AppSizes.radiusMedium),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
           ),
-        ),
-
-        if (isCorrect!) ...[
-          const SizedBox(height: AppSizes.spaceMedium),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.info_outline,
+            color: AppColors.white,
+            size: 20,
+          ),
+          const SizedBox(width: AppSizes.spaceSmall),
           Text(
-            'Tap "Next" to celebrate! 🎉',
+            wrongAnswerMessage!,
             style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
+              color: AppColors.white,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
-      ],
+      ),
     );
   }
 }

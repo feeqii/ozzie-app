@@ -27,6 +27,9 @@ void main() async {
   
   print('✅ Hive initialized successfully!');
   
+  // Note: Microphone permission will be requested by flutter_sound when needed
+  // This is more reliable than requesting it here
+  
   runApp(
     // ProviderScope enables Riverpod state management throughout the app
     const ProviderScope(

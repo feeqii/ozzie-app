@@ -98,8 +98,8 @@ class QuranDataService {
   /// For now, returns the Surahs we have JSON files for
   /// Later, we can expand this to all 114 Surahs!
   Future<List<Surah>> getAllAvailableSurahs() async {
-    // For MVP, we only have Al-Fatiha (and will add Al-Ikhlas later)
-    return await loadMultipleSurahs([1]);
+    // For MVP, we have Al-Fatiha (1) and Al-Ikhlas (112)
+    return await loadMultipleSurahs([1, 112]);
   }
 
   /// Clear the cache (if needed)
